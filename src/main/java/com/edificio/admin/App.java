@@ -7,8 +7,8 @@ import javafx.stage.Stage;
  * Clase principal del Sistema de Administración de Edificios.
  * Punto de entrada de la aplicación JavaFX.
  *
- * @autor Sebasr0311
- * @autor JoseReales-ui
+ * @author Sebasr0311
+ * @author JoseReales-ui
  * @version 1.0.0
  */
 public class App extends Application {
