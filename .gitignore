@@ -1,0 +1,170 @@
+# =============================================================
+# .gitignore — Sistema de Administración de Edificios
+# Java + JavaFX + IntelliJ IDEA + Oracle SQL Express 18c
+# =============================================================
+
+# ----------------------------------------------------------
+# IntelliJ IDEA
+# ----------------------------------------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# ----------------------------------------------------------
+# Java — Archivos compilados
+# ----------------------------------------------------------
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# ----------------------------------------------------------
+# Directorios de build
+# ----------------------------------------------------------
+target/
+build/
+dist/
+bin/
+
+# ----------------------------------------------------------
+# Maven
+# ----------------------------------------------------------
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ----------------------------------------------------------
+# Gradle
+# ----------------------------------------------------------
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# ----------------------------------------------------------
+# JavaFX
+# ----------------------------------------------------------
+# SDK de JavaFX (se descarga por separado)
+javafx-sdk*/
+
+# ----------------------------------------------------------
+# Oracle / Base de Datos
+# ----------------------------------------------------------
+# Driver JDBC Oracle (se agrega manualmente a lib/)
+ojdbc*.jar
+# Archivos de configuración locales con credenciales
+database.properties
+db.properties
+*.properties
+# Excepciones: propiedades de muestra sin credenciales
+!src/main/resources/config/database.properties.example
+
+# ----------------------------------------------------------
+# Librerías externas (se agregan manualmente)
+# ----------------------------------------------------------
+lib/*.jar
+# Excepciones: archivos de referencia de versión
+!lib/.gitkeep
+
+# ----------------------------------------------------------
+# Archivos de configuración sensibles
+# ----------------------------------------------------------
+*.env
+.env
+.env.local
+config.properties
+application-local.properties
+
+# ----------------------------------------------------------
+# Archivos subidos / PDFs de documentos
+# ----------------------------------------------------------
+uploads/
+pdfs/
+
+# ----------------------------------------------------------
+# Logs
+# ----------------------------------------------------------
+*.log
+*.log.*
+logs/
+*.out
+
+# ----------------------------------------------------------
+# Archivos temporales del sistema operativo
+# ----------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ----------------------------------------------------------
+# Archivos temporales de editores
+# ----------------------------------------------------------
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.rej
+*#
+
+# ----------------------------------------------------------
+# VS Code (por si algún colaborador usa otro IDE)
+# ----------------------------------------------------------
+.vscode/
+*.code-workspace
+
+# ----------------------------------------------------------
+# Eclipse (por compatibilidad)
+# ----------------------------------------------------------
+.classpath
+.project
+.settings/
+.factorypath
+
+# ----------------------------------------------------------
+# NetBeans
+# ----------------------------------------------------------
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ----------------------------------------------------------
+# Cobertura y reportes de pruebas
+# ----------------------------------------------------------
+*.exec
+jacoco.exec
+coverage/
+test-results/
+surefire-reports/
+
+# ----------------------------------------------------------
+# Archivos de sistema de CI/CD local
+# ----------------------------------------------------------
+.vagrant/
+*.tfstate
+*.tfstate.backup

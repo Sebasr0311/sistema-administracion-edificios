@@ -1,0 +1,215 @@
+@startuml ModeloRelacional_SistemaAdministracionEdificios
+
+' ============================================================
+' MODELO RELACIONAL — Sistema de Administración de Edificios
+' Fase 1: Diseño de Base de Datos (4-13 abril 2026)
+' Autores: @Sebasr0311, @JoseReales-ui
+'
+' ESTADO: ESQUELETO INICIAL — Se completa en Fase 1
+' ============================================================
+
+title Modelo Relacional\nSistema de Administración de Edificios
+
+skinparam class {
+    BackgroundColor #F0F8FF
+    BorderColor #336699
+    FontSize 11
+    HeaderBackgroundColor #336699
+    HeaderFontColor #FFFFFF
+}
+
+' ============================================================
+' TABLAS DEL MODELO RELACIONAL
+' Notación: PK = Primary Key, FK = Foreign Key, UK = Unique Key
+' ============================================================
+
+class EDIFICIO {
+    + id_edificio : NUMBER <<PK>>
+    --
+    nombre : VARCHAR2(100) NOT NULL
+    direccion : VARCHAR2(200) NOT NULL
+    ciudad : VARCHAR2(100)
+    departamento : VARCHAR2(100)
+    telefono : VARCHAR2(20)
+    email_administrador : VARCHAR2(100)
+}
+
+class APARTAMENTO {
+    + id_apartamento : NUMBER <<PK>>
+    --
+    id_edificio : NUMBER <<FK>>
+    numero : VARCHAR2(10) NOT NULL
+    piso : NUMBER NOT NULL
+    area_m2 : NUMBER(6,2)
+    num_habitaciones : NUMBER
+    num_banos : NUMBER
+    estado : VARCHAR2(20) NOT NULL
+    valor_arriendo : NUMBER(12,2) NOT NULL
+    descripcion : VARCHAR2(500)
+}
+
+class PERSONA {
+    + id_persona : NUMBER <<PK>>
+    --
+    tipo_documento : VARCHAR2(20) NOT NULL
+    numero_documento : VARCHAR2(20) NOT NULL <<UK>>
+    nombres : VARCHAR2(100) NOT NULL
+    apellidos : VARCHAR2(100) NOT NULL
+    fecha_nacimiento : DATE NOT NULL
+    correo : VARCHAR2(100)
+    telefono : VARCHAR2(20)
+    ruta_pdf_documento : VARCHAR2(500)
+    fecha_registro : TIMESTAMP DEFAULT SYSDATE
+}
+
+class TUTOR_MENOR {
+    + id_tutor_menor : NUMBER <<PK>>
+    --
+    id_menor : NUMBER <<FK>> NOT NULL
+    id_tutor : NUMBER <<FK>> NOT NULL
+    tipo_relacion : VARCHAR2(50) NOT NULL
+    fecha_registro : TIMESTAMP DEFAULT SYSDATE
+}
+
+class CONTRATO {
+    + id_contrato : NUMBER <<PK>>
+    --
+    id_apartamento : NUMBER <<FK>> NOT NULL
+    id_titular : NUMBER <<FK>> NOT NULL
+    numero_contrato : VARCHAR2(50) NOT NULL <<UK>>
+    fecha_inicio : DATE NOT NULL
+    fecha_fin : DATE
+    valor_mensual : NUMBER(12,2) NOT NULL
+    dia_pago : NUMBER(2) NOT NULL
+    estado : VARCHAR2(20) NOT NULL
+    observaciones : VARCHAR2(1000)
+    fecha_creacion : TIMESTAMP DEFAULT SYSDATE
+}
+
+class RESIDENTE {
+    + id_residente : NUMBER <<PK>>
+    --
+    id_contrato : NUMBER <<FK>> NOT NULL
+    id_persona : NUMBER <<FK>> NOT NULL
+    fecha_ingreso : DATE NOT NULL
+    fecha_salida : DATE
+    es_titular : NUMBER(1) DEFAULT 0
+}
+
+class PAGO {
+    + id_pago : NUMBER <<PK>>
+    --
+    id_contrato : NUMBER <<FK>> NOT NULL
+    id_persona_registro : NUMBER <<FK>> NOT NULL
+    mes_pago : NUMBER(2) NOT NULL
+    anno_pago : NUMBER(4) NOT NULL
+    fecha_pago : DATE NOT NULL
+    valor_pagado : NUMBER(12,2) NOT NULL
+    metodo_pago : VARCHAR2(50)
+    referencia_pago : VARCHAR2(100)
+    observaciones : VARCHAR2(500)
+    fecha_registro : TIMESTAMP DEFAULT SYSDATE
+}
+
+class VISITANTE_REGISTRADO {
+    + id_visitante : NUMBER <<PK>>
+    --
+    id_persona : NUMBER <<FK>> NOT NULL
+    id_apartamento_visita : NUMBER <<FK>> NOT NULL
+    registrado_por : NUMBER <<FK>> NOT NULL
+    fecha_primer_registro : TIMESTAMP DEFAULT SYSDATE
+    total_visitas : NUMBER DEFAULT 0
+    activo : NUMBER(1) DEFAULT 1
+}
+
+class TIPO_VEHICULO {
+    + id_tipo_vehiculo : NUMBER <<PK>>
+    --
+    nombre : VARCHAR2(50) NOT NULL <<UK>>
+    descripcion : VARCHAR2(200)
+}
+
+class CODIGO_QR_VISITA {
+    + id_codigo_qr : NUMBER <<PK>>
+    --
+    id_visitante : NUMBER <<FK>> NOT NULL
+    id_tipo_vehiculo : NUMBER <<FK>> NOT NULL
+    generado_por : NUMBER <<FK>> NOT NULL
+    codigo_uuid : VARCHAR2(36) NOT NULL <<UK>>
+    duracion_minutos : NUMBER(3) NOT NULL
+    fecha_generacion : TIMESTAMP DEFAULT SYSDATE
+    fecha_expiracion : TIMESTAMP NOT NULL
+    estado : VARCHAR2(20) DEFAULT 'PENDIENTE'
+    fecha_uso : TIMESTAMP
+    num_acompanantes : NUMBER DEFAULT 0
+}
+
+class ACOMPANANTE_VISITA {
+    + id_acompanante : NUMBER <<PK>>
+    --
+    id_codigo_qr : NUMBER <<FK>> NOT NULL
+    nombres_apellidos : VARCHAR2(200) NOT NULL
+    tipo_documento : VARCHAR2(20)
+    numero_documento : VARCHAR2(20)
+}
+
+class ESTACIONAMIENTO_VISITANTE {
+    + id_estacionamiento : NUMBER <<PK>>
+    --
+    id_codigo_qr : NUMBER <<FK>> NOT NULL
+    id_tipo_vehiculo : NUMBER <<FK>> NOT NULL
+    numero_espacio : VARCHAR2(20) NOT NULL
+    fecha_asignacion : TIMESTAMP DEFAULT SYSDATE
+    fecha_liberacion : TIMESTAMP
+}
+
+class HISTORIAL_VISITA {
+    + id_historial : NUMBER <<PK>>
+    --
+    id_codigo_qr : NUMBER <<FK>> NOT NULL
+    id_vigilante : NUMBER <<FK>> NOT NULL
+    hora_entrada : TIMESTAMP DEFAULT SYSDATE
+    hora_salida : TIMESTAMP
+    observaciones : VARCHAR2(500)
+    identidad_verificada : NUMBER(1) DEFAULT 0
+}
+
+class USUARIO {
+    + id_usuario : NUMBER <<PK>>
+    --
+    id_persona : NUMBER <<FK>> NOT NULL
+    username : VARCHAR2(50) NOT NULL <<UK>>
+    password_hash : VARCHAR2(255) NOT NULL
+    rol : VARCHAR2(20) NOT NULL
+    activo : NUMBER(1) DEFAULT 1
+    fecha_creacion : TIMESTAMP DEFAULT SYSDATE
+    ultimo_login : TIMESTAMP
+}
+
+' ============================================================
+' RELACIONES (Cardinalidades del Modelo Relacional)
+' ============================================================
+
+EDIFICIO "1" -- "0..*" APARTAMENTO : id_edificio
+APARTAMENTO "1" -- "0..*" CONTRATO : id_apartamento
+PERSONA "1" -- "0..*" TUTOR_MENOR : id_menor
+PERSONA "1" -- "0..*" TUTOR_MENOR : id_tutor
+PERSONA "1" -- "0..*" CONTRATO : id_titular
+CONTRATO "1" -- "0..*" RESIDENTE : id_contrato
+PERSONA "1" -- "0..*" RESIDENTE : id_persona
+CONTRATO "1" -- "0..*" PAGO : id_contrato
+PERSONA "1" -- "0..1" USUARIO : id_persona
+USUARIO "1" -- "0..*" PAGO : id_persona_registro
+USUARIO "1" -- "0..*" VISITANTE_REGISTRADO : registrado_por
+PERSONA "1" -- "0..*" VISITANTE_REGISTRADO : id_persona
+APARTAMENTO "1" -- "0..*" VISITANTE_REGISTRADO : id_apartamento_visita
+VISITANTE_REGISTRADO "1" -- "0..*" CODIGO_QR_VISITA : id_visitante
+TIPO_VEHICULO "1" -- "0..*" CODIGO_QR_VISITA : id_tipo_vehiculo
+USUARIO "1" -- "0..*" CODIGO_QR_VISITA : generado_por
+CODIGO_QR_VISITA "1" -- "0..*" ACOMPANANTE_VISITA : id_codigo_qr
+CODIGO_QR_VISITA "1" -- "0..1" ESTACIONAMIENTO_VISITANTE : id_codigo_qr
+TIPO_VEHICULO "1" -- "0..*" ESTACIONAMIENTO_VISITANTE : id_tipo_vehiculo
+CODIGO_QR_VISITA "1" -- "0..1" HISTORIAL_VISITA : id_codigo_qr
+USUARIO "1" -- "0..*" HISTORIAL_VISITA : id_vigilante
+
+@enduml

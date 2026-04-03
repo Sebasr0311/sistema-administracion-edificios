@@ -1,0 +1,270 @@
+@startuml MER_SistemaAdministracionEdificios
+
+' ============================================================
+' MODELO ENTIDAD-RELACIÓN — Sistema de Administración de Edificios
+' Fase 1: Diseño de Base de Datos (4-13 abril 2026)
+' Autores: @Sebasr0311, @JoseReales-ui
+'
+' ESTADO: ESQUELETO INICIAL — Se completa en Fase 1
+' ============================================================
+
+title Modelo Entidad-Relación\nSistema de Administración de Edificios
+
+skinparam entity {
+    BackgroundColor #FEFEFE
+    BorderColor #336699
+    FontSize 12
+}
+
+skinparam note {
+    BackgroundColor #FFFACD
+    BorderColor #DAA520
+}
+
+' ============================================================
+' ENTIDADES
+' ============================================================
+
+entity EDIFICIO {
+    * id_edificio : NUMBER <<PK>>
+    --
+    nombre : VARCHAR2(100)
+    direccion : VARCHAR2(200)
+    ciudad : VARCHAR2(100)
+    departamento : VARCHAR2(100)
+    telefono : VARCHAR2(20)
+    email_administrador : VARCHAR2(100)
+}
+
+entity APARTAMENTO {
+    * id_apartamento : NUMBER <<PK>>
+    --
+    # id_edificio : NUMBER <<FK>>
+    numero : VARCHAR2(10)
+    piso : NUMBER
+    area_m2 : NUMBER
+    num_habitaciones : NUMBER
+    num_banos : NUMBER
+    estado : VARCHAR2(20)
+    ' Estados: DISPONIBLE, OCUPADO, MANTENIMIENTO
+    valor_arriendo : NUMBER
+    descripcion : VARCHAR2(500)
+}
+
+entity PERSONA {
+    * id_persona : NUMBER <<PK>>
+    --
+    tipo_documento : VARCHAR2(20)
+    ' Tipos: CC (Cédula), TI (Tarjeta Identidad), CE (Cédula Extranjería)
+    numero_documento : VARCHAR2(20)
+    nombres : VARCHAR2(100)
+    apellidos : VARCHAR2(100)
+    fecha_nacimiento : DATE
+    correo : VARCHAR2(100)
+    telefono : VARCHAR2(20)
+    ruta_pdf_documento : VARCHAR2(500)
+    ' Ruta al PDF del documento de identidad
+    fecha_registro : TIMESTAMP
+}
+
+entity TUTOR_MENOR {
+    * id_tutor_menor : NUMBER <<PK>>
+    --
+    # id_menor : NUMBER <<FK>>
+    ' FK a PERSONA (el menor de edad)
+    # id_tutor : NUMBER <<FK>>
+    ' FK a PERSONA (el tutor o padre)
+    tipo_relacion : VARCHAR2(50)
+    ' Tipos: PADRE, MADRE, TUTOR_LEGAL, ACUDIENTE
+    fecha_registro : TIMESTAMP
+}
+
+entity CONTRATO {
+    * id_contrato : NUMBER <<PK>>
+    --
+    # id_apartamento : NUMBER <<FK>>
+    # id_titular : NUMBER <<FK>>
+    ' FK a PERSONA - si menor, es el tutor; si mayor, es el residente
+    numero_contrato : VARCHAR2(50)
+    fecha_inicio : DATE
+    fecha_fin : DATE
+    valor_mensual : NUMBER
+    dia_pago : NUMBER
+    ' Día del mes en que se debe pagar
+    estado : VARCHAR2(20)
+    ' Estados: ACTIVO, FINALIZADO, SUSPENDIDO
+    observaciones : VARCHAR2(1000)
+    fecha_creacion : TIMESTAMP
+}
+
+entity RESIDENTE {
+    * id_residente : NUMBER <<PK>>
+    --
+    # id_contrato : NUMBER <<FK>>
+    # id_persona : NUMBER <<FK>>
+    fecha_ingreso : DATE
+    fecha_salida : DATE
+    ' NULL si todavía reside
+    es_titular : NUMBER(1)
+    ' 1 = es el titular del contrato, 0 = residente adicional
+}
+
+entity PAGO {
+    * id_pago : NUMBER <<PK>>
+    --
+    # id_contrato : NUMBER <<FK>>
+    # id_persona_registro : NUMBER <<FK>>
+    ' FK a USUARIO que registró el pago
+    mes_pago : NUMBER
+    anno_pago : NUMBER
+    fecha_pago : DATE
+    valor_pagado : NUMBER
+    metodo_pago : VARCHAR2(50)
+    ' Tipos: EFECTIVO, TRANSFERENCIA, CONSIGNACION
+    referencia_pago : VARCHAR2(100)
+    observaciones : VARCHAR2(500)
+    fecha_registro : TIMESTAMP
+}
+
+entity VISITANTE_REGISTRADO {
+    * id_visitante : NUMBER <<PK>>
+    --
+    # id_persona : NUMBER <<FK>>
+    ' FK a PERSONA (reutiliza datos si ya existe)
+    # id_apartamento_visita : NUMBER <<FK>>
+    ' FK a APARTAMENTO que va a visitar
+    # registrado_por : NUMBER <<FK>>
+    ' FK a USUARIO que registró la visita
+    fecha_primer_registro : TIMESTAMP
+    total_visitas : NUMBER
+    activo : NUMBER(1)
+}
+
+entity TIPO_VEHICULO {
+    * id_tipo_vehiculo : NUMBER <<PK>>
+    --
+    nombre : VARCHAR2(50)
+    ' Tipos: CARRO, MOTO, BICICLETA, NINGUNO
+    descripcion : VARCHAR2(200)
+}
+
+entity CODIGO_QR_VISITA {
+    * id_codigo_qr : NUMBER <<PK>>
+    --
+    # id_visitante : NUMBER <<FK>>
+    # id_tipo_vehiculo : NUMBER <<FK>>
+    # generado_por : NUMBER <<FK>>
+    ' FK a USUARIO (propietario del apartamento)
+    codigo_uuid : VARCHAR2(36)
+    ' UUID único generado por el sistema
+    duracion_minutos : NUMBER
+    ' Mínimo 5, máximo 60
+    fecha_generacion : TIMESTAMP
+    fecha_expiracion : TIMESTAMP
+    estado : VARCHAR2(20)
+    ' Estados: PENDIENTE, USADO, EXPIRADO
+    fecha_uso : TIMESTAMP
+    ' NULL si no ha sido usado
+    num_acompanantes : NUMBER
+    ' Cantidad de personas adicionales (0 si viene solo)
+}
+
+entity ACOMPANANTE_VISITA {
+    * id_acompanante : NUMBER <<PK>>
+    --
+    # id_codigo_qr : NUMBER <<FK>>
+    nombres_apellidos : VARCHAR2(200)
+    tipo_documento : VARCHAR2(20)
+    numero_documento : VARCHAR2(20)
+}
+
+entity ESTACIONAMIENTO_VISITANTE {
+    * id_estacionamiento : NUMBER <<PK>>
+    --
+    # id_codigo_qr : NUMBER <<FK>>
+    # id_tipo_vehiculo : NUMBER <<FK>>
+    numero_espacio : VARCHAR2(20)
+    ' Espacio asignado automáticamente
+    fecha_asignacion : TIMESTAMP
+    fecha_liberacion : TIMESTAMP
+    ' NULL si el vehículo todavía está
+}
+
+entity HISTORIAL_VISITA {
+    * id_historial : NUMBER <<PK>>
+    --
+    # id_codigo_qr : NUMBER <<FK>>
+    # id_vigilante : NUMBER <<FK>>
+    ' FK a USUARIO (vigilante que registró la entrada)
+    hora_entrada : TIMESTAMP
+    hora_salida : TIMESTAMP
+    ' NULL si no ha salido
+    observaciones : VARCHAR2(500)
+    identidad_verificada : NUMBER(1)
+    ' 1 = el vigilante verificó el documento, 0 = no
+}
+
+entity USUARIO {
+    * id_usuario : NUMBER <<PK>>
+    --
+    # id_persona : NUMBER <<FK>>
+    username : VARCHAR2(50)
+    password_hash : VARCHAR2(255)
+    ' Contraseña almacenada con hash (nunca en texto plano)
+    rol : VARCHAR2(20)
+    ' Roles: ADMIN, PROPIETARIO, VIGILANTE
+    activo : NUMBER(1)
+    fecha_creacion : TIMESTAMP
+    ultimo_login : TIMESTAMP
+}
+
+' ============================================================
+' RELACIONES
+' (Se detallarán completamente en Fase 1)
+' ============================================================
+
+EDIFICIO ||--o{ APARTAMENTO : "tiene"
+APARTAMENTO ||--o{ CONTRATO : "tiene"
+PERSONA ||--o{ TUTOR_MENOR : "es menor en"
+PERSONA ||--o{ TUTOR_MENOR : "es tutor en"
+CONTRATO }o--|| PERSONA : "firmado por"
+CONTRATO ||--o{ RESIDENTE : "tiene"
+PERSONA ||--o{ RESIDENTE : "es"
+CONTRATO ||--o{ PAGO : "genera"
+PERSONA ||--o| USUARIO : "tiene cuenta"
+USUARIO ||--o{ VISITANTE_REGISTRADO : "registra"
+PERSONA ||--o{ VISITANTE_REGISTRADO : "es"
+APARTAMENTO ||--o{ VISITANTE_REGISTRADO : "recibe"
+VISITANTE_REGISTRADO ||--o{ CODIGO_QR_VISITA : "tiene"
+TIPO_VEHICULO ||--o{ CODIGO_QR_VISITA : "asociado a"
+USUARIO ||--o{ CODIGO_QR_VISITA : "genera"
+CODIGO_QR_VISITA ||--o{ ACOMPANANTE_VISITA : "puede tener"
+CODIGO_QR_VISITA ||--o| ESTACIONAMIENTO_VISITANTE : "asigna"
+TIPO_VEHICULO ||--o{ ESTACIONAMIENTO_VISITANTE : "determina"
+CODIGO_QR_VISITA ||--o| HISTORIAL_VISITA : "registra"
+USUARIO ||--o{ HISTORIAL_VISITA : "registra (vigilante)"
+
+note bottom of CODIGO_QR_VISITA
+  Reglas de negocio:
+  - UUID único por visita
+  - Un solo uso (estado cambia a USADO al escanear)
+  - Expira según duración definida por propietario
+  - Duración: mínimo 5 min, máximo 60 min
+  - Se puede compartir por WhatsApp
+end note
+
+note bottom of CONTRATO
+  Reglas de negocio:
+  - Todos los apartamentos son de ARRIENDO (no venta)
+  - Si el residente es MENOR DE EDAD,
+    el contrato va a nombre del TUTOR LEGAL
+end note
+
+note bottom of USUARIO
+  Roles del sistema:
+  - ADMIN: acceso completo
+  - PROPIETARIO: gestiona su apartamento
+  - VIGILANTE: controla acceso y escanea QR
+end note
+
+@enduml
