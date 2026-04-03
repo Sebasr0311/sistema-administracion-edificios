@@ -1,0 +1,235 @@
+@startuml
+' ============================================================
+' Modelo Entidad-Relación — Sistema de Administración de Edificios
+' Herramienta: PlantUML
+' Descripción: MER del sistema con todas las entidades del dominio
+' ============================================================
+
+title Modelo Entidad-Relación — Sistema de Administración de Edificios
+
+' ----------------------------------------------------------
+' Entidad: EDIFICIO
+' ----------------------------------------------------------
+entity EDIFICIO {
+  * id_edificio : NUMBER <<PK>>
+  --
+  nombre : VARCHAR2(100)
+  direccion : VARCHAR2(200)
+  ciudad : VARCHAR2(100)
+  departamento : VARCHAR2(100)
+  total_pisos : NUMBER
+  total_apartamentos : NUMBER
+}
+
+' ----------------------------------------------------------
+' Entidad: APARTAMENTO
+' ----------------------------------------------------------
+entity APARTAMENTO {
+  * id_apartamento : NUMBER <<PK>>
+  --
+  id_edificio : NUMBER <<FK>>
+  numero : VARCHAR2(10)
+  piso : NUMBER
+  area_m2 : NUMBER
+  habitaciones : NUMBER
+  estado : VARCHAR2(20)
+  ' estado: DISPONIBLE, ARRENDADO, EN_MANTENIMIENTO
+}
+
+' ----------------------------------------------------------
+' Entidad: PERSONA
+' ----------------------------------------------------------
+entity PERSONA {
+  * id_persona : NUMBER <<PK>>
+  --
+  tipo_documento : VARCHAR2(20)
+  numero_documento : VARCHAR2(20)
+  nombres : VARCHAR2(100)
+  apellidos : VARCHAR2(100)
+  fecha_nacimiento : DATE
+  telefono : VARCHAR2(20)
+  correo : VARCHAR2(100)
+  es_menor_edad : CHAR(1)
+}
+
+' ----------------------------------------------------------
+' Entidad: TUTOR_MENOR
+' Relación entre un menor de edad y su tutor/padre
+' ----------------------------------------------------------
+entity TUTOR_MENOR {
+  * id_tutor_menor : NUMBER <<PK>>
+  --
+  id_menor : NUMBER <<FK>>
+  id_tutor : NUMBER <<FK>>
+  parentesco : VARCHAR2(50)
+}
+
+' ----------------------------------------------------------
+' Entidad: CONTRATO
+' ----------------------------------------------------------
+entity CONTRATO {
+  * id_contrato : NUMBER <<PK>>
+  --
+  id_apartamento : NUMBER <<FK>>
+  id_persona : NUMBER <<FK>>
+  ' id_persona = propietario/arrendatario (puede ser tutor si el residente es menor)
+  fecha_inicio : DATE
+  fecha_fin : DATE
+  valor_arriendo : NUMBER
+  estado : VARCHAR2(20)
+  ' estado: ACTIVO, FINALIZADO, CANCELADO
+}
+
+' ----------------------------------------------------------
+' Entidad: RESIDENTE
+' Personas que viven en el apartamento según el contrato
+' ----------------------------------------------------------
+entity RESIDENTE {
+  * id_residente : NUMBER <<PK>>
+  --
+  id_contrato : NUMBER <<FK>>
+  id_persona : NUMBER <<FK>>
+  fecha_ingreso : DATE
+  fecha_salida : DATE
+}
+
+' ----------------------------------------------------------
+' Entidad: PAGO
+' ----------------------------------------------------------
+entity PAGO {
+  * id_pago : NUMBER <<PK>>
+  --
+  id_contrato : NUMBER <<FK>>
+  fecha_pago : DATE
+  valor : NUMBER
+  mes_pagado : VARCHAR2(20)
+  comprobante : VARCHAR2(200)
+  observaciones : VARCHAR2(500)
+}
+
+' ----------------------------------------------------------
+' Entidad: VISITANTE_REGISTRADO
+' Visitante registrado por un propietario/residente
+' ----------------------------------------------------------
+entity VISITANTE_REGISTRADO {
+  * id_visitante : NUMBER <<PK>>
+  --
+  id_persona_registra : NUMBER <<FK>>
+  ' id_persona_registra = quien genera la visita
+  nombres_visitante : VARCHAR2(100)
+  apellidos_visitante : VARCHAR2(100)
+  tipo_documento : VARCHAR2(20)
+  numero_documento : VARCHAR2(20)
+  pdf_documento : BLOB
+  ' PDF del documento de identidad del visitante
+  id_tipo_vehiculo : NUMBER <<FK>>
+  placa_vehiculo : VARCHAR2(10)
+}
+
+' ----------------------------------------------------------
+' Entidad: TIPO_VEHICULO
+' ----------------------------------------------------------
+entity TIPO_VEHICULO {
+  * id_tipo_vehiculo : NUMBER <<PK>>
+  --
+  nombre : VARCHAR2(50)
+  ' Ej: AUTOMOVIL, MOTO, BICICLETA, SIN_VEHICULO
+}
+
+' ----------------------------------------------------------
+' Entidad: ESTACIONAMIENTO_VISITANTE
+' ----------------------------------------------------------
+entity ESTACIONAMIENTO_VISITANTE {
+  * id_estacionamiento : NUMBER <<PK>>
+  --
+  id_visitante : NUMBER <<FK>>
+  numero_puesto : VARCHAR2(10)
+  tipo_puesto : VARCHAR2(20)
+  fecha_asignacion : TIMESTAMP
+  fecha_liberacion : TIMESTAMP
+}
+
+' ----------------------------------------------------------
+' Entidad: CODIGO_QR_VISITA
+' Código QR único de un solo uso para autorizar una visita
+' ----------------------------------------------------------
+entity CODIGO_QR_VISITA {
+  * id_codigo_qr : NUMBER <<PK>>
+  --
+  id_visitante : NUMBER <<FK>>
+  uuid_codigo : VARCHAR2(36)
+  ' UUID único generado al crear el QR
+  fecha_generacion : TIMESTAMP
+  duracion_minutos : NUMBER
+  ' Duración entre 5 y 60 minutos
+  fecha_expiracion : TIMESTAMP
+  estado : VARCHAR2(20)
+  ' estado: ACTIVO, USADO, EXPIRADO
+  imagen_qr : BLOB
+}
+
+' ----------------------------------------------------------
+' Entidad: ACOMPANANTE_VISITA
+' Acompañantes del visitante principal
+' ----------------------------------------------------------
+entity ACOMPANANTE_VISITA {
+  * id_acompanante : NUMBER <<PK>>
+  --
+  id_codigo_qr : NUMBER <<FK>>
+  nombres : VARCHAR2(100)
+  apellidos : VARCHAR2(100)
+  tipo_documento : VARCHAR2(20)
+  numero_documento : VARCHAR2(20)
+}
+
+' ----------------------------------------------------------
+' Entidad: HISTORIAL_VISITA
+' Registro de cada escaneo de QR por el vigilante
+' ----------------------------------------------------------
+entity HISTORIAL_VISITA {
+  * id_historial : NUMBER <<PK>>
+  --
+  id_codigo_qr : NUMBER <<FK>>
+  fecha_escaneo : TIMESTAMP
+  id_usuario_vigilante : NUMBER <<FK>>
+  observaciones : VARCHAR2(500)
+}
+
+' ----------------------------------------------------------
+' Entidad: USUARIO
+' Cuentas de acceso al sistema
+' ----------------------------------------------------------
+entity USUARIO {
+  * id_usuario : NUMBER <<PK>>
+  --
+  id_persona : NUMBER <<FK>>
+  nombre_usuario : VARCHAR2(50)
+  contrasena_hash : VARCHAR2(256)
+  rol : VARCHAR2(20)
+  ' rol: ADMINISTRADOR, PROPIETARIO, VIGILANTE
+  activo : CHAR(1)
+  ultimo_acceso : TIMESTAMP
+}
+
+' ----------------------------------------------------------
+' Relaciones entre entidades
+' ----------------------------------------------------------
+
+EDIFICIO ||--o{ APARTAMENTO : "tiene"
+APARTAMENTO ||--o{ CONTRATO : "genera"
+PERSONA ||--o{ CONTRATO : "firma"
+CONTRATO ||--o{ RESIDENTE : "incluye"
+PERSONA ||--o{ RESIDENTE : "es"
+CONTRATO ||--o{ PAGO : "registra"
+PERSONA ||--o{ TUTOR_MENOR : "es tutor de"
+PERSONA ||--o{ TUTOR_MENOR : "tiene tutor"
+PERSONA ||--o{ VISITANTE_REGISTRADO : "registra visita de"
+TIPO_VEHICULO ||--o{ VISITANTE_REGISTRADO : "clasifica"
+VISITANTE_REGISTRADO ||--o{ CODIGO_QR_VISITA : "genera"
+VISITANTE_REGISTRADO ||--o{ ESTACIONAMIENTO_VISITANTE : "usa"
+CODIGO_QR_VISITA ||--o{ ACOMPANANTE_VISITA : "incluye"
+CODIGO_QR_VISITA ||--o{ HISTORIAL_VISITA : "registra escaneo"
+PERSONA ||--o{ USUARIO : "tiene cuenta"
+USUARIO ||--o{ HISTORIAL_VISITA : "escanea"
+
+@enduml

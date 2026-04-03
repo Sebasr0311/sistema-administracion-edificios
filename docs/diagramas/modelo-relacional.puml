@@ -1,0 +1,218 @@
+@startuml
+' ============================================================
+' Modelo Relacional — Sistema de Administración de Edificios
+' Herramienta: PlantUML
+' Descripción: Tablas con columnas, PK, FK, restricciones
+' ============================================================
+
+title Modelo Relacional — Sistema de Administración de Edificios
+
+' ----------------------------------------------------------
+' Tabla: EDIFICIO
+' ----------------------------------------------------------
+class EDIFICIO {
+  + id_edificio : NUMBER <<PK>>
+  --
+  nombre : VARCHAR2(100) <<NOT NULL>>
+  direccion : VARCHAR2(200) <<NOT NULL>>
+  ciudad : VARCHAR2(100) <<NOT NULL>>
+  departamento : VARCHAR2(100)
+  total_pisos : NUMBER
+  total_apartamentos : NUMBER
+}
+
+' ----------------------------------------------------------
+' Tabla: APARTAMENTO
+' ----------------------------------------------------------
+class APARTAMENTO {
+  + id_apartamento : NUMBER <<PK>>
+  --
+  id_edificio : NUMBER <<FK>> <<NOT NULL>>
+  numero : VARCHAR2(10) <<NOT NULL>> <<UNIQUE>>
+  piso : NUMBER <<NOT NULL>>
+  area_m2 : NUMBER(6,2)
+  habitaciones : NUMBER
+  estado : VARCHAR2(20) <<NOT NULL>>
+}
+
+' ----------------------------------------------------------
+' Tabla: PERSONA
+' ----------------------------------------------------------
+class PERSONA {
+  + id_persona : NUMBER <<PK>>
+  --
+  tipo_documento : VARCHAR2(20) <<NOT NULL>>
+  numero_documento : VARCHAR2(20) <<NOT NULL>> <<UNIQUE>>
+  nombres : VARCHAR2(100) <<NOT NULL>>
+  apellidos : VARCHAR2(100) <<NOT NULL>>
+  fecha_nacimiento : DATE <<NOT NULL>>
+  telefono : VARCHAR2(20)
+  correo : VARCHAR2(100)
+  es_menor_edad : CHAR(1) <<DEFAULT 'N'>>
+}
+
+' ----------------------------------------------------------
+' Tabla: TUTOR_MENOR
+' ----------------------------------------------------------
+class TUTOR_MENOR {
+  + id_tutor_menor : NUMBER <<PK>>
+  --
+  id_menor : NUMBER <<FK>> <<NOT NULL>>
+  id_tutor : NUMBER <<FK>> <<NOT NULL>>
+  parentesco : VARCHAR2(50) <<NOT NULL>>
+}
+
+' ----------------------------------------------------------
+' Tabla: CONTRATO
+' ----------------------------------------------------------
+class CONTRATO {
+  + id_contrato : NUMBER <<PK>>
+  --
+  id_apartamento : NUMBER <<FK>> <<NOT NULL>>
+  id_persona : NUMBER <<FK>> <<NOT NULL>>
+  fecha_inicio : DATE <<NOT NULL>>
+  fecha_fin : DATE
+  valor_arriendo : NUMBER(12,2) <<NOT NULL>>
+  estado : VARCHAR2(20) <<NOT NULL>>
+}
+
+' ----------------------------------------------------------
+' Tabla: RESIDENTE
+' ----------------------------------------------------------
+class RESIDENTE {
+  + id_residente : NUMBER <<PK>>
+  --
+  id_contrato : NUMBER <<FK>> <<NOT NULL>>
+  id_persona : NUMBER <<FK>> <<NOT NULL>>
+  fecha_ingreso : DATE <<NOT NULL>>
+  fecha_salida : DATE
+}
+
+' ----------------------------------------------------------
+' Tabla: PAGO
+' ----------------------------------------------------------
+class PAGO {
+  + id_pago : NUMBER <<PK>>
+  --
+  id_contrato : NUMBER <<FK>> <<NOT NULL>>
+  fecha_pago : DATE <<NOT NULL>>
+  valor : NUMBER(12,2) <<NOT NULL>>
+  mes_pagado : VARCHAR2(20) <<NOT NULL>>
+  comprobante : VARCHAR2(200)
+  observaciones : VARCHAR2(500)
+}
+
+' ----------------------------------------------------------
+' Tabla: TIPO_VEHICULO
+' ----------------------------------------------------------
+class TIPO_VEHICULO {
+  + id_tipo_vehiculo : NUMBER <<PK>>
+  --
+  nombre : VARCHAR2(50) <<NOT NULL>> <<UNIQUE>>
+}
+
+' ----------------------------------------------------------
+' Tabla: VISITANTE_REGISTRADO
+' ----------------------------------------------------------
+class VISITANTE_REGISTRADO {
+  + id_visitante : NUMBER <<PK>>
+  --
+  id_persona_registra : NUMBER <<FK>> <<NOT NULL>>
+  nombres_visitante : VARCHAR2(100) <<NOT NULL>>
+  apellidos_visitante : VARCHAR2(100) <<NOT NULL>>
+  tipo_documento : VARCHAR2(20) <<NOT NULL>>
+  numero_documento : VARCHAR2(20) <<NOT NULL>>
+  pdf_documento : BLOB
+  id_tipo_vehiculo : NUMBER <<FK>>
+  placa_vehiculo : VARCHAR2(10)
+}
+
+' ----------------------------------------------------------
+' Tabla: ESTACIONAMIENTO_VISITANTE
+' ----------------------------------------------------------
+class ESTACIONAMIENTO_VISITANTE {
+  + id_estacionamiento : NUMBER <<PK>>
+  --
+  id_visitante : NUMBER <<FK>> <<NOT NULL>>
+  numero_puesto : VARCHAR2(10) <<NOT NULL>>
+  tipo_puesto : VARCHAR2(20) <<NOT NULL>>
+  fecha_asignacion : TIMESTAMP <<NOT NULL>>
+  fecha_liberacion : TIMESTAMP
+}
+
+' ----------------------------------------------------------
+' Tabla: CODIGO_QR_VISITA
+' ----------------------------------------------------------
+class CODIGO_QR_VISITA {
+  + id_codigo_qr : NUMBER <<PK>>
+  --
+  id_visitante : NUMBER <<FK>> <<NOT NULL>>
+  uuid_codigo : VARCHAR2(36) <<NOT NULL>> <<UNIQUE>>
+  fecha_generacion : TIMESTAMP <<NOT NULL>>
+  duracion_minutos : NUMBER <<NOT NULL>>
+  fecha_expiracion : TIMESTAMP <<NOT NULL>>
+  estado : VARCHAR2(20) <<NOT NULL>>
+  imagen_qr : BLOB
+}
+
+' ----------------------------------------------------------
+' Tabla: ACOMPANANTE_VISITA
+' ----------------------------------------------------------
+class ACOMPANANTE_VISITA {
+  + id_acompanante : NUMBER <<PK>>
+  --
+  id_codigo_qr : NUMBER <<FK>> <<NOT NULL>>
+  nombres : VARCHAR2(100) <<NOT NULL>>
+  apellidos : VARCHAR2(100) <<NOT NULL>>
+  tipo_documento : VARCHAR2(20)
+  numero_documento : VARCHAR2(20)
+}
+
+' ----------------------------------------------------------
+' Tabla: HISTORIAL_VISITA
+' ----------------------------------------------------------
+class HISTORIAL_VISITA {
+  + id_historial : NUMBER <<PK>>
+  --
+  id_codigo_qr : NUMBER <<FK>> <<NOT NULL>>
+  fecha_escaneo : TIMESTAMP <<NOT NULL>>
+  id_usuario_vigilante : NUMBER <<FK>> <<NOT NULL>>
+  observaciones : VARCHAR2(500)
+}
+
+' ----------------------------------------------------------
+' Tabla: USUARIO
+' ----------------------------------------------------------
+class USUARIO {
+  + id_usuario : NUMBER <<PK>>
+  --
+  id_persona : NUMBER <<FK>> <<NOT NULL>> <<UNIQUE>>
+  nombre_usuario : VARCHAR2(50) <<NOT NULL>> <<UNIQUE>>
+  contrasena_hash : VARCHAR2(256) <<NOT NULL>>
+  rol : VARCHAR2(20) <<NOT NULL>>
+  activo : CHAR(1) <<DEFAULT 'S'>>
+  ultimo_acceso : TIMESTAMP
+}
+
+' ----------------------------------------------------------
+' Relaciones (FK) entre tablas
+' ----------------------------------------------------------
+
+EDIFICIO "1" --> "0..*" APARTAMENTO : id_edificio
+APARTAMENTO "1" --> "0..*" CONTRATO : id_apartamento
+PERSONA "1" --> "0..*" CONTRATO : id_persona
+CONTRATO "1" --> "0..*" RESIDENTE : id_contrato
+PERSONA "1" --> "0..*" RESIDENTE : id_persona
+CONTRATO "1" --> "0..*" PAGO : id_contrato
+PERSONA "1" --> "0..*" TUTOR_MENOR : id_menor
+PERSONA "1" --> "0..*" TUTOR_MENOR : id_tutor
+PERSONA "1" --> "0..*" VISITANTE_REGISTRADO : id_persona_registra
+TIPO_VEHICULO "1" --> "0..*" VISITANTE_REGISTRADO : id_tipo_vehiculo
+VISITANTE_REGISTRADO "1" --> "0..*" CODIGO_QR_VISITA : id_visitante
+VISITANTE_REGISTRADO "1" --> "0..*" ESTACIONAMIENTO_VISITANTE : id_visitante
+CODIGO_QR_VISITA "1" --> "0..*" ACOMPANANTE_VISITA : id_codigo_qr
+CODIGO_QR_VISITA "1" --> "0..*" HISTORIAL_VISITA : id_codigo_qr
+PERSONA "1" --> "0..1" USUARIO : id_persona
+USUARIO "1" --> "0..*" HISTORIAL_VISITA : id_usuario_vigilante
+
+@enduml
