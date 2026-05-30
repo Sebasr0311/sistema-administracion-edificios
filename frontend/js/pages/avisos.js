@@ -17,7 +17,7 @@ const Avisos = (() => {
       apartamentosPorPiso = {};
       apts.forEach(function(a) {
         var piso = Math.floor((parseInt(a.numero) || 0) / 100);
-        if (piso >= 2 && piso <= 5) {
+        if (piso >= 2) {
           if (!apartamentosPorPiso[piso]) apartamentosPorPiso[piso] = [];
           apartamentosPorPiso[piso].push(a);
         }
@@ -40,8 +40,9 @@ const Avisos = (() => {
       dropdown.appendChild(sep1);
       
       // Opciones por piso
-      for (var p = 2; p <= 5; p++) {
-        if (apartamentosPorPiso[p] && apartamentosPorPiso[p].length > 0) {
+      var pisos = Object.keys(apartamentosPorPiso).map(Number).sort(function(a, b) { return a - b; });
+      for (var i = 0; i < pisos.length; i++) {
+        var p = pisos[i];
           var divPiso = document.createElement('div');
           divPiso.className = 'multi-select-option multi-select-piso';
           divPiso.dataset.value = 'piso-' + p;
@@ -58,8 +59,8 @@ const Avisos = (() => {
       dropdown.appendChild(sep2);
       
       // Apartamentos individuales organizados por piso
-      for (var p = 2; p <= 5; p++) {
-        if (apartamentosPorPiso[p] && apartamentosPorPiso[p].length > 0) {
+      for (var i = 0; i < pisos.length; i++) {
+        var p = pisos[i];
           // Header del piso
           var header = document.createElement('div');
           header.className = 'multi-select-header';
