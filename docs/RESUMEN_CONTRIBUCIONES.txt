@@ -1,0 +1,784 @@
+============================================================================
+  RESUMEN DE CONTRIBUCIONES POR INTEGRANTE
+  Sistema de Administracion de Edificio Residencial (SAED)
+============================================================================
+
+  Repositorio : https://github.com/Sebasr0311/sistema-administracion-edificios
+  Stack       : Java 17 + Oracle XE/ATP | REST embebido | SPA Vanilla JS
+  Total commits: ~90 (49 Juan + 28 Jose + 13 Ivan)
+
+============================================================================
+  1. SEBASTIAN RINCON (Sebasr0311) — LIDER DE DESARROLLO
+     juansebastianrincon@unicesar.edu.co
+     ~49 commits
+============================================================================
+
+  Responsabilidad: Arquitectura general, servidor REST, base de datos,
+  modulo de visitas/QR, panel del portero, deploy en la nube y migracion ATP.
+
+  --------------------------------------------------------------------------
+  1.1 RAMA: feature/bd-schema (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 09 - Mar 13, 2026
+  Merge a develop: Mar 14
+
+  Archivos creados:
+    database/modelo_relacional.txt
+      Documento textual con el modelo entidad-relacion del sistema: describe
+      las 21 tablas, sus columnas, tipos, claves primarias/foraneas y las
+      relaciones entre entidades.
+
+    diagramas/modelo_relacional.puml
+      Diagrama PlantUML del modelo relacional para visualizar las tablas y
+      sus relaciones graficamente.
+
+    database/script_oracle.sql
+      Primer script DDL con las tablas principales del sistema (RESIDENTES,
+      APARTAMENTOS, USUARIOS, CONTRATOS, VISITAS, etc.).
+
+    database/modelo_relacional_v4.sql
+      Version final del schema con 21 tablas, 21 secuencias autoincrementales
+      y triggers de auditoria (fecha_creacion, fecha_modificacion).
+
+    database/datos_prueba.sql, database/datos_prueba_corregido.sql
+      Datos de prueba iniciales para desarrollo local con inserts de
+      residentes, apartamentos, usuarios y configuraciones basicas.
+
+    database/datos_masivos.sql, database/datos_masivos_v2.sql
+      Scripts con datos masivos para pruebas de carga del sistema.
+
+    database/datos_finales.sql
+      Datos finales de produccion listos para poblacion inicial.
+
+  --------------------------------------------------------------------------
+  1.2 RAMA: feature/backend-core (10 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 16 - Mar 19, 2026
+  Merge a develop: Mar 21
+
+  Archivos creados:
+    src/main/java/com/edificio/admin/exception/ConexionFallidaException.java
+    src/main/java/com/edificio/admin/exception/DatosInvalidosException.java
+    src/main/java/com/edificio/admin/exception/RegistroNoEncontradoException.java
+      Excepciones personalizadas del dominio de negocio.
+
+    src/main/java/com/edificio/admin/model/enums/TipoRol.java
+    src/main/java/com/edificio/admin/model/enums/EstadoApartamento.java
+    src/main/java/com/edificio/admin/model/enums/EstadoContrato.java
+    src/main/java/com/edificio/admin/model/enums/EstadoCuota.java
+    src/main/java/com/edificio/admin/model/enums/EstadoMulta.java
+    src/main/java/com/edificio/admin/model/enums/EstadoParqueadero.java
+    src/main/java/com/edificio/admin/model/enums/EstadoVisita.java
+    src/main/java/com/edificio/admin/model/enums/MetodoPago.java
+    src/main/java/com/edificio/admin/model/enums/TipoContrato.java
+    src/main/java/com/edificio/admin/model/enums/TipoParqueadero.java
+    src/main/java/com/edificio/admin/model/enums/TipoVehiculo.java
+      Enumeraciones usadas en todo el sistema para roles, estados y tipos.
+
+    src/main/java/com/edificio/admin/model/Persona.java
+      Clase base abstracta para la jerarquia de personas (Residente, Usuario,
+      Visitante, etc.) con atributos compartidos: nombre, documento, telefono.
+
+    src/main/java/com/edificio/admin/model/TipoDocumento.java
+      Modelo para los tipos de documento de identidad (CC, CE, NIT, etc.).
+
+    src/main/java/com/edificio/admin/dao/ConexionBD.java
+      Singleton de conexion JDBC a Oracle XE con lectura de credenciales
+      desde bd.properties.
+
+    src/main/java/com/edificio/admin/dao/CrudDAO.java
+      Interfaz generica con metodos CRUD basicos: listar, buscarPorId,
+      guardar, actualizar, eliminar.
+
+    src/main/java/com/edificio/admin/rest/RestServer.java
+      Servidor HTTP embebido en puerto 8080 con enrutamiento de peticiones
+      a los handlers correspondientes y soporte CORS.
+
+    src/main/java/com/edificio/admin/rest/CorsFilter.java
+      Filtro que agrega cabeceras CORS (Access-Control-Allow-Origin, etc.)
+      a todas las respuestas para permitir peticiones desde el frontend.
+
+    src/main/java/com/edificio/admin/rest/JwtUtil.java
+      Utilidad para generar y validar tokens JWT con HMAC-SHA256, usado
+      para autenticar las peticiones del frontend.
+
+    src/main/java/com/edificio/admin/rest/JsonUtil.java
+      Wrapper sobre Gson para serializar/deserializar objetos Java a JSON
+      y viceversa.
+
+    src/main/java/com/edificio/admin/rest/AuthMiddleware.java
+      Middleware que intercepta todas las peticiones HTTP y valida el token
+      JWT en el header Authorization, rechazando peticiones no autenticadas.
+
+    src/main/java/com/edificio/admin/config/SesionUsuario.java
+      Clase thread-local que mantiene los datos del usuario autenticado
+      durante el ciclo de vida de una peticion.
+
+    src/main/java/com/edificio/admin/rest/dto/LoginRequest.java
+    src/main/java/com/edificio/admin/rest/dto/LoginResponse.java
+    src/main/java/com/edificio/admin/rest/dto/ErrorResponse.java
+      DTOs para el flujo de autenticacion: request de login, response con
+      token JWT, y respuesta de error generica.
+
+    src/main/java/com/edificio/admin/rest/handler/BaseHandler.java
+      Clase base abstracta para todos los handlers REST con metodos de
+      utilidad para enviar respuestas JSON.
+
+    src/main/java/com/edificio/admin/rest/handler/AuthHandler.java
+      Handler del endpoint POST /api/auth/login que valida credenciales
+      contra la BD y retorna un token JWT.
+
+    src/main/java/com/edificio/admin/rest/StaticFilesHandler.java
+      Sirve los archivos estaticos del frontend (HTML, CSS, JS, imagenes)
+      en la carpeta /frontend.
+
+    src/main/java/com/edificio/admin/Main.java
+    src/main/java/com/edificio/admin/RestServerMain.java
+      Puntos de entrada del servidor.
+
+    src/main/java/com/edificio/admin/util/FechaUtil.java
+      Utilidades para formateo y manipulacion de fechas (Java Date <-> SQL
+      Date, formato ISO, calculo de dias entre fechas).
+
+    src/main/java/com/edificio/admin/util/ValidadorCampos.java
+      Validacion de campos obligatorios, longitud, formato de correo, etc.
+
+    src/main/java/com/edificio/admin/util/ValidadorDocumento.java
+      Validacion de documentos de identidad. Verifica que el numero de
+      documento tenga el formato correcto segun el tipo (CC, CE, NIT).
+
+    src/main/java/com/edificio/admin/util/GenerarHash.java
+      Generacion de hashes BCrypt para contrasenas de usuario.
+
+  --------------------------------------------------------------------------
+  1.3 RAMA: feature/modulo-visitas-qr (8 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 23 - Mar 27, 2026
+  Merge a develop: Mar 27
+
+  Archivos creados:
+    Modelos: Visitante.java, PersonaVisita.java, VehiculoVisita.java,
+             Visita.java, QRAcceso.java, RegistroAcceso.java,
+             VisitanteFrecuente.java, Parqueadero.java
+
+    DAOs: VisitanteDAO, PersonaVisitaDAO, VehiculoVisitaDAO, VisitaDAO,
+          QRAccesoDAO, RegistroAccesoDAO, VisitanteFrecuenteDAO, ParqueaderoDAO
+
+    Services: VisitaService.java, ParqueaderoService.java
+
+    Handlers: VisitaHandler, VisitanteHandler, QrHandler,
+              RegistroAccesoHandler, ParqueaderoHandler
+
+    Util: GeneradorQR.java (integracion con ZXing para generar codigos QR)
+
+  --------------------------------------------------------------------------
+  1.4 RAMA: feature/modulo-portero (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: Abr 08 - Abr 12, 2026
+  Merge a develop: Abr 16
+
+  Archivos creados (frontend JS):
+    frontend/js/pages/portero-dashboard.js
+      Panel principal del portero con resumen de visitas activas del dia,
+      KPIs de ingresos/salidas y acceso rapido a registro de visitas.
+
+    frontend/js/pages/visitas.js
+      Formulario completo para registrar visitantes, vehiculos y horas de
+      acceso. Incluye busqueda de residentes y apartamentos.
+
+    frontend/js/pages/escanner-qr.js
+      Interfaz de escaneo QR con camara (html5-qrcode) o carga de imagen
+      para validar acceso en porteria.
+
+    frontend/js/pages/historial-visitas.js
+      Tabla de registros de entrada/salida con filtros por fecha, residente
+      y estado. Incluye exportacion.
+
+    frontend/js/pages/parqueaderos.js
+      Vista de parqueaderos con asignacion a residentes y control de
+      acceso diferenciado por rol (portero solo lectura).
+
+  --------------------------------------------------------------------------
+  1.5 RAMA: feature/deploy-cloud (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: May 11 - May 15, 2026
+  Merge a develop: May 16
+
+  Modificaciones:
+    pom.xml
+      Configuracion del maven-shade-plugin para empaquetar uber jar con
+      todas las dependencias.
+
+    src/main/java/com/edificio/admin/RestServerMain.java
+      Agrega health endpoint y soporte para variable de entorno PORT.
+
+    src/main/java/com/edificio/admin/dao/ConexionBD.java
+      Actualizacion para leer credenciales de variables de entorno
+      (DB_URL, DB_USER, DB_PASS) primero, con fallback a bd.properties.
+
+    Archivos nuevos:
+      Procfile (Railway)
+      netlify.toml (proxy a backend)
+      frontend/imagenes/saed_logo_final_blue.png
+      frontend/imagenes/saed_logo_emblem_only.png
+      frontend/imagenes/saed_logo_corporate.png
+
+    frontend/css/style.css, frontend/js/app.js
+      Rediseno del sidebar con estilo ERP y menu acordeon.
+
+  --------------------------------------------------------------------------
+  1.6 RAMA: feature/atp-migration (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: May 18 - May 22, 2026
+  Merge a develop: May 23
+
+  Archivos creados:
+    database/modelo_relacional_v4_atp.sql
+      Schema adaptado para Oracle ATP: sin ORDER BY en secuencias,
+      sin ALTER SESSION, sin ALTER SYSTEM, sin trailing /.
+
+    src/main/java/com/edificio/admin/util/WalletSetup.java
+      Extrae wallet Oracle desde variable de entorno WALLET_BASE64 (o
+      PART1+PART2 para Railway por limite de 32K chars).
+
+    database/RunSchemaFinal.java
+      Migrador JDBC con parser PL/SQL que ejecuta DDL/DML contra ATP.
+      Incluye manejo de errores, regex para filtrar comandos SQL*Plus,
+      y eliminacion de comentarios bloque.
+
+    pom.xml
+      Agrega dependencia oraclepki y corrige exclusiones osdt para
+      compatibilidad con ATP.
+
+    .gitignore
+      Agrega wallet.zip y wallet_base64.txt.
+
+  --------------------------------------------------------------------------
+  1.7 RAMA: feature/final-adjustments (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: May 25 - May 28, 2026
+  Merge a develop: May 28
+
+  Archivos creados/modificados:
+    database/datos_prueba.sql (actualizacion para ATP)
+    database/update_passwords.sql (cambia todas las contrasenas a admin123)
+    frontend/index.html, frontend/css/style.css, frontend/js/app.js
+      Sidebar colapsable: 72px colapsado, 240px al hover con submenus.
+      Ajuste de tamanos de logos: login 260px, topbar 32px, sidebar 40px.
+    database/RunSchemaFinal.java (fix regex SET y filtro comentarios bloque)
+
+  --------------------------------------------------------------------------
+  1.8 COMMITS DIRECTOS (post-v2.0)
+  --------------------------------------------------------------------------
+  Fechas: May 28, 2026
+
+  Correcciones en main:
+    - Charset UTF-8 en respuestas JSON (BaseHandler, AuthMiddleware, RestServer)
+    - Filtro conUsuario=true en endpoint de residentes
+    - Fix acentos en TIPOS_DOCUMENTO (Cedula -> Cedula)
+    - Validacion de apartamento OCUPADO en MultaHandler y BuzonHandler
+    - Filtro DISPONIBLE en dropdowns de apartamentos
+    - Dropdowns de residentes usan conUsuario=true
+
+============================================================================
+  2. JOSE REALES (JoseReales-ui) — DESARROLLADOR 1
+     jdaviddejesusreales@unicesar.edu.co
+     ~28 commits
+============================================================================
+
+  Responsabilidad: Modulos administrativos: residentes, apartamentos,
+  contratos, pagos, cuotas, multas, alertas, quejas, usuarios del sistema,
+  avisos masivos, y paginas JS administrativas.
+
+  --------------------------------------------------------------------------
+  2.1 RAMA: feature/modulo-residentes (7 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 18 - Mar 24, 2026
+  Merge a develop: Mar 25
+
+  Modelos:
+    src/main/java/com/edificio/admin/model/Residente.java
+      Entidad Residente con atributos: nombres, apellidos, documento,
+      fechaNacimiento, telefono, email, fotoDoc, idApartamento, idTutor.
+      Representa a una persona que vive en un apartamento del edificio.
+
+    src/main/java/com/edificio/admin/model/Apartamento.java
+      Entidad Apartamento con atributos: numero, piso, torre, tipo,
+      estado (DISPONIBLE/OCUPADO/MANTENIMIENTO), valorAdministracion.
+      Cada apartamento puede tener uno o varios residentes asociados.
+
+    src/main/java/com/edificio/admin/model/Usuario.java
+      Entidad Usuario con atributos: username, password (hash BCrypt),
+      rol (ADMIN/PORTERO/RESIDENTE), idPersona, activo.
+      Cada usuario tiene acceso al sistema segun su rol.
+
+    src/main/java/com/edificio/admin/model/Tutor.java
+      Entidad Tutor para residentes menores de edad: nombres, documento,
+      telefono, parentesco, direccion. Permite registrar un adulto
+      responsable del menor.
+
+  DAOs (Capa de acceso a datos):
+    src/main/java/com/edificio/admin/dao/ResidenteDAO.java
+      CRUD completo para tabla RESIDENTES. Incluye metodos para buscar
+      por numero de documento, listar por apartamento, y busqueda textual
+      por nombre/apellido. Query nativo con JOIN a APARTAMENTOS y TUTORES.
+
+    src/main/java/com/edificio/admin/dao/ApartamentoDAO.java
+      CRUD para tabla APARTAMENTOS. Incluye filtros por estado y torre,
+      actualizacion de estado al asignar/desocupar.
+
+    src/main/java/com/edificio/admin/dao/UsuarioDAO.java
+      CRUD para tabla USUARIOS. Incluye autenticacion (buscar por username
+      y password hash), activacion/desactivacion de cuentas.
+
+    src/main/java/com/edificio/admin/dao/TipoDocumentoDAO.java
+      CRUD para tabla TIPOS_DOCUMENTO. Lista los tipos de documento
+      disponibles (Cedula de Ciudadania, Cedula de Extranjeria, etc.).
+
+    src/main/java/com/edificio/admin/dao/TutorDAO.java
+      CRUD para tabla TUTORES. Incluye busqueda por documento y listado
+      de tutores con sus residentes a cargo.
+
+  Services (Logica de negocio):
+    src/main/java/com/edificio/admin/service/ResidenteService.java
+      Orquesta las operaciones de negocio para residentes: validacion de
+      datos antes de guardar, verificacion de documento unico, asignacion
+      a apartamento disponible.
+
+    src/main/java/com/edificio/admin/service/ApartamentoService.java
+      Logica de negocio para apartamentos: validacion de numero unico por
+      torre, cambio de estado automatico al asignar/desocupar.
+
+    src/main/java/com/edificio/admin/service/UsuarioService.java
+      Gestion de usuarios: creacion con hash de contrasena, cambio de
+      contrasena, validacion de username unico.
+
+  Handlers REST (Endpoints HTTP):
+    src/main/java/com/edificio/admin/rest/handler/ResidenteHandler.java
+      Endpoints: GET /api/residentes, GET /api/residentes/{id},
+      POST /api/residentes, PUT /api/residentes/{id},
+      DELETE /api/residentes/{id}, GET /api/residentes?documento=XXX
+
+    src/main/java/com/edificio/admin/rest/handler/ApartamentoHandler.java
+      Endpoints: CRUD completo para apartamentos + filtros por estado.
+
+    src/main/java/com/edificio/admin/rest/handler/UsuarioHandler.java
+      Endpoints: CRUD para usuarios + cambio de contrasena.
+
+    src/main/java/com/edificio/admin/rest/handler/TipoDocumentoHandler.java
+      Endpoint: GET /api/tipos-documento (lista completa).
+
+    src/main/java/com/edificio/admin/rest/handler/TutorHandler.java
+      Endpoints: CRUD para tutores.
+
+  --------------------------------------------------------------------------
+  2.2 RAMA: feature/modulo-contratos (8 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 25 - Abr 01, 2026
+  Merge a develop: Abr 03
+
+  Modelos:
+    src/main/java/com/edificio/admin/model/Contrato.java
+      Entidad Contrato de arrendamiento: numeroContrato, fechaInicio,
+      fechaFin, valorCanon, tipo (INICIAL/PERMANENCIA/RENOVACION),
+      estado (ACTIVO/VENCEDO/CANCELADO), clausulas, idApartamento.
+
+    src/main/java/com/edificio/admin/model/ContratoResidente.java
+      Entidad asociativa entre Contrato y Residente. Un contrato puede
+      tener varios residentes firmantes.
+
+    src/main/java/com/edificio/admin/model/Pago.java
+      Entidad Pago: idContrato, idResidente, fechaPago, valorPagado,
+      metodoPago (EFECTIVO/TARJETA/TRANSFERENCIA), comprobante, estado.
+
+    src/main/java/com/edificio/admin/model/CuotaArriendo.java
+      Entidad CuotaArriendo: mes, anio, valorBase, valorMora, valorTotal,
+      fechaVencimiento, estado (PENDIENTE/PAGADA/VENCIDA/MORA), idContrato.
+
+    src/main/java/com/edificio/admin/model/AlertaPago.java
+      Entidad AlertaPago: tipo (VENCIMIENTO/MORA), mensaje, fechaCreacion,
+      leida, idResidente, idCuota.
+
+  DAOs:
+    src/main/java/com/edificio/admin/dao/ContratoDAO.java
+      CRUD para contratos con expiracion automatica (actualiza estado a
+      VENCIDO cuando fechaFin < hoy). Incluye JOIN con APARTAMENTOS para
+      obtener datos completos.
+
+    src/main/java/com/edificio/admin/dao/ContratoResidenteDAO.java
+      CRUD para la tabla asociativa CONTRATOS_RESIDENTES.
+
+    src/main/java/com/edificio/admin/dao/PagoDAO.java
+      CRUD para pagos con calculo de mora automatico. Incluye busqueda
+      por contrato, residente y rango de fechas.
+
+    src/main/java/com/edificio/admin/dao/CuotaArriendoDAO.java
+      CRUD para cuotas de arriendo. Incluye generacion automatica de
+      cuotas al crear contrato, calculo de mora diaria.
+
+    src/main/java/com/edificio/admin/dao/AlertaPagoDAO.java
+      CRUD para alertas de pago. Incluye marcado como leidas y consulta
+      de alertas no leidas por residente.
+
+  Services:
+    src/main/java/com/edificio/admin/service/ContratoService.java
+      Logica de contratos: creacion con validacion de fechas, renovacion,
+      terminacion anticipada, calculo de valor canon.
+
+    src/main/java/com/edificio/admin/service/ContratoValidatorService.java
+      Validacion de contratos: verifica que el apartamento no tenga otro
+      contrato activo, que las fechas sean coherentes, que el residente
+      exista.
+
+    src/main/java/com/edificio/admin/service/ContratoSuggestionService.java
+      Sugerencias para contratos: recomienda valores de canon basados en
+      el historial del apartamento, detecta renovaciones.
+
+    src/main/java/com/edificio/admin/service/ContratoPdfService.java
+    src/main/java/com/edificio/admin/service/TemplateRenderService.java
+    src/main/java/com/edificio/admin/service/VariableResolverService.java
+    src/main/java/com/edificio/admin/service/PdfGeneratorService.java
+      Servicios para generacion de PDF de contratos usando Flying Saucer
+      (HTML a PDF). TemplateRenderService procesa plantillas HTML con
+      variables, VariableResolverService inyecta datos del contrato,
+      PdfGeneratorService genera el PDF final.
+
+    src/main/java/com/edificio/admin/service/PagoService.java
+      Logica de pagos: registro de pagos, calculo de mora, actualizacion
+      de estado de cuotas, historial de pagos por residente.
+
+    src/main/java/com/edificio/admin/service/AlertaService.java
+      Generacion automatica de alertas: detecta cuotas proximas a vencer
+      (7 dias antes) y cuotas en mora, crea notificaciones para residentes.
+
+  Handlers REST:
+    src/main/java/com/edificio/admin/rest/handler/ContratoHandler.java
+      Endpoints completos para contratos: CRUD + renovacion + descarga PDF.
+
+    src/main/java/com/edificio/admin/rest/handler/PagoHandler.java
+      Endpoints para pagos: registro, consulta por residente/contrato.
+
+    src/main/java/com/edificio/admin/rest/handler/CuotaHandler.java
+      Endpoints para cuotas: listado por contrato, detalle de mora.
+
+    src/main/java/com/edificio/admin/rest/handler/AlertaHandler.java
+      Endpoints para alertas: listar por residente, marcar como leida.
+
+  DTOs:
+    src/main/java/com/edificio/admin/rest/dto/ContratoDetalleDTO.java
+      DTO con datos completos del contrato incluyendo informacion del
+      apartamento, residentes, y resumen de pagos.
+
+  Plantillas HTML:
+    src/main/resources/templates/contratos/contrato_inicial.html
+    src/main/resources/templates/contratos/contrato_permanencia.html
+    src/main/resources/templates/contratos/contrato_renovacion.html
+    Plantillas_Contratos/contrato_inicial.html
+    Plantillas_Contratos/contrato_permanencia.html
+    Plantillas_Contratos/contrato_renovacion.html
+      Plantillas HTML usadas para generar los PDFs de contratos. Cada
+      tipo de contrato (inicial, permanencia, renovacion) tiene su
+      propia plantilla con variables inyectables.
+
+  --------------------------------------------------------------------------
+  2.3 RAMA: feature/modulo-gestion (4 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 30 - Abr 03, 2026
+  Merge a develop: Abr 05
+
+  Modelos:
+    src/main/java/com/edificio/admin/model/Multa.java
+      Entidad Multa: tipo (RUIDO/PARQUEADERO/OTRO), valor, descripcion,
+      fecha, estado (PENDIENTE/PAGADA/ANULADA), idApartamento, idResidente.
+
+    src/main/java/com/edificio/admin/model/QuejaSugerencia.java
+      Entidad QuejaSugerencia: asunto, descripcion, fecha, estado
+      (ABIERTA/EN_REVISION/CERRADA), idResidente, anonima.
+
+    src/main/java/com/edificio/admin/model/Buzon.java
+      Entidad Buzon: tipo (MENSAJE/PAQUETE/AVISO), asunto, contenido,
+      fecha, leido, idRemitente, idDestinatario, idApartamento.
+
+  DAOs:
+    src/main/java/com/edificio/admin/dao/MultaDAO.java
+      CRUD para multas con filtros por apartamento, estado y rango de
+      fechas.
+
+    src/main/java/com/edificio/admin/dao/QuejaSugerenciaDAO.java
+      CRUD para quejas con busqueda por residente y estado.
+
+    src/main/java/com/edificio/admin/dao/BuzonDAO.java
+      CRUD para el buzon: mensajes, paquetes registrados en porteria,
+      avisos del administrador. Incluye conteo de no leidos.
+
+  Services:
+    src/main/java/com/edificio/admin/service/NotificacionService.java
+      Servicio de notificaciones internas: envia mensajes a residentes
+      cuando hay multas, alertas de pago, o avisos del administrador.
+
+    src/main/java/com/edificio/admin/service/EdificioConfigService.java
+      Parametros de configuracion del edificio: valor de administracion,
+      porcentaje de mora diario, horario de visitas, etc.
+
+  Handlers REST:
+    src/main/java/com/edificio/admin/rest/handler/MultaHandler.java
+      Endpoints CRUD para multas + validacion de apartamento OCUPADO.
+
+    src/main/java/com/edificio/admin/rest/handler/QuejaSugerenciaHandler.java
+      Endpoints CRUD para quejas y sugerencias.
+
+    src/main/java/com/edificio/admin/rest/handler/BuzonHandler.java
+      Endpoints para buzon: envio de mensajes, registro de paquetes,
+      avisos de ruido, avisos masivos del admin.
+
+  --------------------------------------------------------------------------
+  2.4 RAMA: feature/frontend-admin (6 commits)
+  --------------------------------------------------------------------------
+  Fechas: Abr 06 - Abr 11, 2026
+  Merge a develop: Abr 15
+
+  Paginas JS administrativas:
+    frontend/js/pages/residentes.js
+      CRUD completo de residentes: tabla filtrable por nombre/documento,
+      modal de formulario con validacion, busqueda en tiempo real.
+
+    frontend/js/pages/apartamentos.js
+      Gestion de apartamentos: vista de estado (ocupado/disponible),
+      asignacion de residentes, edicion de torre/piso/numero.
+
+    frontend/js/pages/contratos.js
+      Lista de contratos con filtros por estado. Incluye renovacion de
+      contratos, descarga de PDF, detalle de pagos asociados.
+
+    frontend/js/pages/pagos.js
+      Registro de pagos, listado de cuotas y estado de deuda por
+      residente. Calculo visual de mora.
+
+    frontend/js/pages/usuarios.js
+      Gestion de usuarios del sistema con roles (ADMIN/PORTERO/RESIDENTE)
+      y cambio de contrasena.
+
+    frontend/js/pages/avisos.js
+      Envio de avisos masivos a residentes con seleccion multiple de
+      apartamentos. Historial de avisos enviados.
+
+    frontend/js/pages/quejas-admin.js
+      Gestion de quejas recibidas: cambio de estado, respuesta al
+      residente, filtros por estado y fecha.
+
+  --------------------------------------------------------------------------
+  2.5 COMMITS DIRECTOS
+  --------------------------------------------------------------------------
+
+  Commit 12.2 (Abr 14, 2026):
+    Vistas FXML y controladores JavaFX para modulos administrativos:
+    - FXML: Login, Dashboard, Apartamentos, Contratos, Pagos,
+            AlertasPago, Residentes, Usuarios, Parqueaderos
+    - Controladores: LoginController, DashboardController,
+      ApartamentoController, ContratoController, PagoController,
+      AlertasPagoController, ResidenteController, UsuarioController
+
+  Commit 13.2 (Abr 21, 2026):
+    database/datos_prueba_v2.sql
+      Segunda version de datos de prueba con escenarios de mora y multas.
+
+  Commit 14.2 (Abr 29, 2026):
+    RESUMEN_PROYECTO.txt
+      Resumen tecnico completo del proyecto SAED.
+
+============================================================================
+  3. IVAN CAMILO HERNANDEZ (icamilohernandez) — DESARROLLADOR 2
+     icamilohernandez@unicesar.edu.co
+     ~13 commits
+============================================================================
+
+  Responsabilidad: Interfaz web base (HTML, CSS, router, auth JS),
+  portal del residente (dashboard, paquetes, quejas, alertas),
+  experiencia de usuario y estilos globales.
+
+  --------------------------------------------------------------------------
+  3.1 RAMA: feature/frontend-base (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: Mar 25 - Mar 30, 2026
+  Merge a develop: Abr 01
+
+  Archivos creados:
+    frontend/js/auth.js
+      Modulo de autenticacion frontend: manejo de JWT en sessionStorage,
+      funciones login/logout, token interceptor para peticiones fetch.
+      Almacena el token y datos del usuario en sessionStorage y los
+      envia en cada peticion.
+
+    frontend/js/api.js
+      Cliente HTTP centralizado para consumo de la API REST. Encapsula
+      todas las llamadas fetch con manejo de errores, timeout, y envio
+      automatico del token JWT en headers.
+
+    frontend/js/router.js
+      Sistema de navegacion por hash (#/ruta) sin recargar la pagina.
+      Incluye guardias de ruta que redirigen al login si no hay sesion,
+      y carga los modulos JS segun la ruta activa.
+
+    frontend/js/utils.js
+      Funciones utilitarias del frontend: formateo de fechas (DD/MM/AAAA),
+      formateo de moneda (COP con separadores de miles), validaciones de
+      formularios, mensajes toast de notificacion, confirm dialog.
+
+    frontend/js/pages/login.js
+      Pagina de login con galeria de imagenes rotativas, toggle para
+      mostrar/ocultar contrasena, checkbox "Recordarme", y validacion
+      de formulario antes de enviar.
+
+  NOTA: Los archivos frontend/index.html, frontend/css/style.css y
+  frontend/js/pages/app.js fueron creados originalmente por Ivan pero
+  posteriormente modificados por Juan en ramas posteriores (deploy-cloud,
+  modulo-portero). Por eso no aparecen commits de Ivan para esos archivos
+  en el historial.
+
+  --------------------------------------------------------------------------
+  3.2 RAMA: feature/frontend-residente (5 commits)
+  --------------------------------------------------------------------------
+  Fechas: Abr 01 - Abr 05, 2026
+  Merge a develop: Abr 10
+
+  Paginas JS del portal residente:
+    frontend/js/pages/residente-dashboard.js
+      Dashboard del residente con KPI cards: multas pendientes, cuotas
+      vencidas, mensajes no leidos, paquetes en porteria. Modales de
+      detalle para cada seccion con datos en tiempo real desde la API.
+
+    frontend/js/pages/paquetes.js
+      Vista donde el residente consulta sus paquetes recibidos en porteria.
+      Filtros por estado (recibido/entregado/reclamado) y busqueda por
+      fecha.
+
+    frontend/js/pages/paquetes-admin.js
+      Pagina admin con historial completo de paquetes, filtros de fecha,
+      busqueda por texto y marcado de entrega.
+
+    frontend/js/pages/quejas-residente.js
+      Formulario y lista de quejas/sugerencias enviadas por el residente.
+      Permite ver el estado de cada queja (abierta/en revision/cerrada)
+      y la respuesta del administrador.
+
+    frontend/js/pages/alertas.js
+      Vista de alertas de pago para residente y administrador. Muestra
+      cuotas proximas a vencer, cuotas en mora, y notificaciones del
+      sistema.
+
+  --------------------------------------------------------------------------
+  3.3 COMMITS DIRECTOS
+  --------------------------------------------------------------------------
+
+  Commit 12.3 (Abr 14, 2026):
+    src/main/resources/com/edificio/admin/view/vistas/ResidenteDashboard.fxml
+      Vista FXML del dashboard del residente para la interfaz JavaFX.
+    src/main/resources/com/edificio/admin/view/estilos/estilos.css
+      Estilos CSS para las vistas FXML.
+    src/main/java/com/edificio/admin/view/controladores/ResidenteDashboardController.java
+      Controlador JavaFX para el dashboard del residente.
+    src/main/java/com/edificio/admin/view/controladores/ControladorVista.java
+      Clase base abstracta para controladores de vista JavaFX.
+
+  Commit 13.3 (Abr 22, 2026):
+    frontend/css/style.css (modificacion)
+      Ajustes de responsividad, colores y espaciado en estilos globales.
+
+  Commit 13.5 (Abr 24, 2026):
+    frontend/js/pages/residente-dashboard.js (modificacion)
+      Correccion del badge de mensajes no leidos en el buzon del residente.
+      Se actualiza correctamente al marcar como leido.
+
+  Commit 14.1 (Abr 28, 2026):
+    DOCUMENTACION_BASE_DATOS.txt
+      Documentacion completa de la base de datos: descripcion de las 21
+      tablas, sus columnas, tipos de datos, relaciones, triggers y
+      paquetes PL/SQL.
+
+============================================================================
+  4. DISTRIBUCION DE RAMAS EN EL REPOSITORIO
+============================================================================
+
+  RAMAS PRINCIPALES:
+  -------------------
+    main          - Rama de produccion. Solo recibe merges de develop.
+    develop       - Rama de integracion. Todas las features llegan aqui.
+
+  RAMAS FEATURE (por responsable):
+  ---------------------------------
+    feature/bd-schema              (Sebasr0311 - Juan)
+    feature/backend-core           (Sebasr0311 - Juan)
+    feature/modulo-visitas-qr      (Sebasr0311 - Juan)
+    feature/modulo-portero         (Sebasr0311 - Juan)
+    feature/deploy-cloud           (Sebasr0311 - Juan)
+    feature/atp-migration          (Sebasr0311 - Juan)
+    feature/final-adjustments      (Sebasr0311 - Juan)
+
+    feature/modulo-residentes      (JoseReales-ui - Jose)
+    feature/modulo-contratos       (JoseReales-ui - Jose)
+    feature/modulo-gestion         (JoseReales-ui - Jose)
+    feature/frontend-admin         (JoseReales-ui - Jose)
+    feature/jose-directos          (JoseReales-ui - Jose)
+
+    feature/frontend-base          (icamilohernandez - Ivan)
+    feature/frontend-residente     (icamilohernandez - Ivan)
+    feature/ivan-directos          (icamilohernandez - Ivan)
+
+  MERGES A DEVELOP (orden cronologico):
+  ---------------------------------------
+     1. feature/bd-schema              -> develop  (Mar 14)
+     2. feature/backend-core            -> develop  (Mar 21)
+     3. feature/modulo-residentes       -> develop  (Mar 25)  [Jose]
+     4. feature/modulo-visitas-qr       -> develop  (Mar 27)
+     5. feature/frontend-base           -> develop  (Abr 01)  [Ivan]
+     6. feature/modulo-contratos        -> develop  (Abr 03)  [Jose]
+     7. feature/modulo-gestion          -> develop  (Abr 05)  [Jose]
+     8. feature/frontend-residente      -> develop  (Abr 10)  [Ivan]
+     9. feature/frontend-admin          -> develop  (Abr 15)  [Jose]
+    10. feature/modulo-portero          -> develop  (Abr 16)
+    11. feature/deploy-cloud            -> develop  (May 16)
+    12. feature/atp-migration           -> develop  (May 23)
+    13. feature/final-adjustments       -> develop  (May 28)
+
+  MERGES A MAIN:
+  ---------------
+     1. develop -> main   (Abr 25)  Release v1.0
+     2. develop -> main   (Abr 30)  Documentacion
+     3. develop -> main   (May 10)  Limpieza final + tag v1.0.0
+     4. develop -> main   (May 28)  Release v2.0 + tag v2.0.0
+     5. main direct       (May 28)  Fixes post-v2.0
+
+============================================================================
+  5. TECNOLOGIAS Y HERRAMIENTAS UTILIZADAS
+============================================================================
+
+  Backend:
+    - Java 17 (OpenJDK)
+    - Oracle XE 18c / Oracle Autonomous Database (ATP)
+    - JDBC para conexion a base de datos
+    - Servidor HTTP embebido (com.sun.net.httpserver)
+    - JWT (io.jsonwebtoken) para autenticacion
+    - Gson para serializacion JSON
+    - BCrypt para hash de contrasenas
+    - ZXing para generacion de codigos QR
+    - Flying Saucer (HTML a PDF) para generacion de contratos
+    - Maven para gestion de dependencias
+
+  Frontend:
+    - HTML5 + CSS3 (SPA - Single Page Application)
+    - JavaScript vanilla (sin frameworks)
+    - html5-qrcode para escaneo QR con camara
+    - SessionStorage para manejo de sesion
+
+  Infraestructura:
+    - Railway (backend)
+    - Netlify (frontend)
+    - Oracle ATP (base de datos en la nube)
+
+  Control de versiones:
+    - Git + GitHub
+    - Ramas feature + develop + main
+
+============================================================================
+  FIN DEL DOCUMENTO
+============================================================================
