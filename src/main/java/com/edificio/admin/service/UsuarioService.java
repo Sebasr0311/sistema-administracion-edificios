@@ -66,6 +66,7 @@ public class UsuarioService {
     }
 
     public Integer registrar(Usuario usuario) throws SQLException {
+        usuario.setUsername(usuario.getUsername().toLowerCase().trim());
         validar(usuario);
         if (usuarioDAO.findByUsername(usuario.getUsername()) != null)
             throw new DatosInvalidosException("El username '" + usuario.getUsername() + "' ya existe.");
@@ -75,6 +76,8 @@ public class UsuarioService {
 
     public void actualizar(Usuario usuario) throws SQLException {
         validarId(usuario.getIdUsuario());
+        if (usuario.getUsername() != null)
+            usuario.setUsername(usuario.getUsername().toLowerCase().trim());
         validar(usuario);
         usuario.setPasswordHash(hashear(usuario.getPasswordHash()));
         usuarioDAO.update(usuario);
