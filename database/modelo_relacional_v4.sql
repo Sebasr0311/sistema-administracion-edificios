@@ -1681,7 +1681,7 @@ CREATE OR REPLACE TRIGGER TRG_RESIDENTES_UPD
     BEFORE UPDATE ON RESIDENTES
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_RESIDENTES_UPD;
 /
 
@@ -1692,7 +1692,7 @@ CREATE OR REPLACE TRIGGER TRG_CONTRATOS_UPD
     BEFORE UPDATE ON CONTRATOS
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_CONTRATOS_UPD;
 /
 
@@ -1706,7 +1706,7 @@ CREATE OR REPLACE TRIGGER TRG_CUOTAS_UPD
     FOR EACH ROW
 BEGIN
     IF UPDATING THEN
-        :NEW.actualizado_en := SYSTIMESTAMP;
+        :NEW.actualizado_en := CURRENT_TIMESTAMP;
     END IF;
     :NEW.valor_total := :NEW.valor_base + :NEW.valor_mora;
 END TRG_CUOTAS_UPD;
@@ -1719,7 +1719,7 @@ CREATE OR REPLACE TRIGGER TRG_VISITAS_UPD
     BEFORE UPDATE ON VISITAS
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_VISITAS_UPD;
 /
 
@@ -1730,7 +1730,7 @@ CREATE OR REPLACE TRIGGER TRG_ACCESO_UPD
     BEFORE UPDATE ON REGISTROS_ACCESO
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_ACCESO_UPD;
 /
 
@@ -1815,7 +1815,7 @@ CREATE OR REPLACE TRIGGER TRG_APARTAMENTOS_UPD
     BEFORE UPDATE ON APARTAMENTOS
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_APARTAMENTOS_UPD;
 /
 
@@ -1826,7 +1826,7 @@ CREATE OR REPLACE TRIGGER TRG_PARQUEADEROS_UPD
     BEFORE UPDATE ON PARQUEADEROS
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_PARQUEADEROS_UPD;
 /
 
@@ -1837,7 +1837,7 @@ CREATE OR REPLACE TRIGGER TRG_TUTORES_UPD
     BEFORE UPDATE ON TUTORES
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_TUTORES_UPD;
 /
 
@@ -1848,7 +1848,7 @@ CREATE OR REPLACE TRIGGER TRG_USUARIOS_UPD
     BEFORE UPDATE ON USUARIOS
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_USUARIOS_UPD;
 /
 
@@ -1859,7 +1859,7 @@ CREATE OR REPLACE TRIGGER TRG_VISITANTES_UPD
     BEFORE UPDATE ON VISITANTES
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_VISITANTES_UPD;
 /
 
@@ -1870,7 +1870,7 @@ CREATE OR REPLACE TRIGGER TRG_VEHICULOS_UPD
     BEFORE UPDATE ON VEHICULOS_VISITA
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_VEHICULOS_UPD;
 /
 
@@ -1915,7 +1915,7 @@ CREATE OR REPLACE TRIGGER TRG_FRECUENTES_UPD
     BEFORE UPDATE ON FRECUENTES_RESIDENTE
     FOR EACH ROW
 BEGIN
-    :NEW.actualizado_en := SYSTIMESTAMP;
+    :NEW.actualizado_en := CURRENT_TIMESTAMP;
 END TRG_FRECUENTES_UPD;
 /
 
@@ -1987,9 +1987,9 @@ BEGIN
     END;
 
     -- 2. Verificar expiración
-    IF SYSTIMESTAMP > v_expiracion THEN
+    IF CURRENT_TIMESTAMP > v_expiracion THEN
         UPDATE QR_ACCESOS
-           SET fecha_uso = SYSTIMESTAMP
+           SET fecha_uso = CURRENT_TIMESTAMP
          WHERE id_qr = v_id_qr;
         UPDATE VISITAS
            SET estado = 'EXPIRADA'
@@ -2012,12 +2012,12 @@ BEGIN
     -- 4. QR válido: marcar como usado y registrar acceso físico
     UPDATE QR_ACCESOS
        SET usado            = 1,
-           fecha_uso        = SYSTIMESTAMP,
+           fecha_uso        = CURRENT_TIMESTAMP,
            id_vigilante_uso = p_id_vigilante
      WHERE id_qr = v_id_qr;
 
     INSERT INTO REGISTROS_ACCESO (id_visita, id_vigilante, hora_entrada)
-    VALUES (v_id_visita, p_id_vigilante, SYSTIMESTAMP);
+    VALUES (v_id_visita, p_id_vigilante, CURRENT_TIMESTAMP);
 
     COMMIT;
 
@@ -2196,7 +2196,7 @@ BEGIN
 
     -- 8. Generar código QR único (SYS_GUID → 32 chars hexadecimal en minúsculas)
     v_codigo_qr := LOWER(RAWTOHEX(SYS_GUID()));
-    v_fecha_exp := SYSTIMESTAMP + NUMTODSINTERVAL(p_tiempo_validez, 'MINUTE');
+    v_fecha_exp := CURRENT_TIMESTAMP + NUMTODSINTERVAL(p_tiempo_validez, 'MINUTE');
 
     INSERT INTO QR_ACCESOS (id_visita, codigo_qr, fecha_expiracion, usado)
     VALUES (v_id_visita, v_codigo_qr, v_fecha_exp, 0);
@@ -2312,7 +2312,7 @@ BEGIN
       FROM QR_ACCESOS
      WHERE codigo_qr = p_codigo_qr;
 
-    RETURN ROUND((CAST(v_expiracion AS DATE) - CAST(SYSTIMESTAMP AS DATE)) * 1440, 1);
+    RETURN ROUND((CAST(v_expiracion AS DATE) - CAST(CURRENT_TIMESTAMP AS DATE)) * 1440, 1);
 EXCEPTION
     WHEN NO_DATA_FOUND THEN RETURN NULL;
 END FN_MINUTOS_RESTANTES_QR;
@@ -2553,7 +2553,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_VISITAS AS
          WHERE rv.id_visitante  = p_id_visitante
            AND v.id_residente   = p_id_residente
            AND q.usado          = 0
-           AND q.fecha_expiracion > SYSTIMESTAMP;
+            AND q.fecha_expiracion > CURRENT_TIMESTAMP;
         RETURN CASE WHEN v_count > 0 THEN 1 ELSE 0 END;
     END FN_TIENE_QR_ACTIVO;
 
@@ -2563,7 +2563,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_VISITAS AS
     BEGIN
         SELECT fecha_expiracion INTO v_exp
           FROM QR_ACCESOS WHERE codigo_qr = p_codigo_qr;
-        RETURN ROUND((CAST(v_exp AS DATE) - CAST(SYSTIMESTAMP AS DATE)) * 1440, 1);
+        RETURN ROUND((CAST(v_exp AS DATE) - CAST(CURRENT_TIMESTAMP AS DATE)) * 1440, 1);
     EXCEPTION
         WHEN NO_DATA_FOUND THEN RETURN NULL;
     END FN_MINUTOS_RESTANTES_QR;
@@ -2590,7 +2590,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_VISITAS AS
 
         -- Invalidar QR asociado si aún no fue usado
         UPDATE QR_ACCESOS
-           SET usado = 1, fecha_uso = SYSTIMESTAMP
+           SET usado = 1, fecha_uso = CURRENT_TIMESTAMP
          WHERE id_visita = p_id_visita AND usado = 0;
 
         COMMIT;
@@ -2627,7 +2627,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_VISITAS AS
         SELECT COUNT(*) INTO v_count
           FROM QR_ACCESOS
          WHERE id_visita = p_id_visita AND usado = 0
-           AND fecha_expiracion > SYSTIMESTAMP;
+            AND fecha_expiracion > CURRENT_TIMESTAMP;
         IF v_count > 0 THEN
             p_codigo_qr := NULL; p_expiracion := NULL;
             p_mensaje := 'Ya existe un QR activo para esta visita.';
@@ -2641,7 +2641,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_VISITAS AS
         END IF;
 
         p_codigo_qr  := LOWER(RAWTOHEX(SYS_GUID()));
-        p_expiracion := SYSTIMESTAMP + NUMTODSINTERVAL(p_tiempo_min, 'MINUTE');
+        p_expiracion := CURRENT_TIMESTAMP + NUMTODSINTERVAL(p_tiempo_min, 'MINUTE');
 
         INSERT INTO QR_ACCESOS (id_visita, codigo_qr, fecha_expiracion, usado)
         VALUES (p_id_visita, p_codigo_qr, p_expiracion, 0);

@@ -36,7 +36,7 @@ import java.util.List;
  * Tab 2 — Registrar Salida:
  *   1. Muestra la tabla de visitas aún dentro del edificio (hora_salida IS NULL).
  *   2. El portero selecciona una fila y pulsa "Registrar Salida".
- *   3. Se actualiza hora_salida = SYSTIMESTAMP en REGISTROS_ACCESO.
+ *   3. Se actualiza hora_salida = CURRENT_TIMESTAMP en REGISTROS_ACCESO.
  *   4. TRG_ACCESO_SALIDA se dispara y cambia VISITAS.estado → FINALIZADA,
  *      libera parqueaderos y registra hora_salida en VEHICULOS_VISITA.
  */

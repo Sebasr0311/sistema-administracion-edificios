@@ -120,6 +120,9 @@ public class ConexionBD {
         try {
             conexion = DriverManager.getConnection(url, usuario, clave);
             conexion.setAutoCommit(true);
+            try (var stmt = conexion.createStatement()) {
+                stmt.execute("ALTER SESSION SET TIME_ZONE = 'America/Bogota'");
+            }
         } catch (SQLException e) {
             throw new ConexionFallidaException(
                 "No se pudo conectar a Oracle (" + url + "): " + e.getMessage(), e);
