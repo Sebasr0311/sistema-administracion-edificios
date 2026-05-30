@@ -69,7 +69,7 @@ const Usuarios = (() => {
         <div class="form-group"><label>Contrase\u00f1a ${isEdit ? '(dejar vac\u00edo para mantener actual)' : ''}</label><input type="password" id="usr-password" class="form-control" ${isEdit ? '' : ''}><span class="field-error" id="usr-password-error"></span></div>
         <div class="form-row">
           <div class="form-group"><label>Rol</label><select id="usr-rol" class="form-control">${ropts}</select><span class="field-error" id="usr-rol-error"></span></div>
-          <div class="form-group"><label>ID Residente (opcional)</label><input type="number" id="usr-id-residente" class="form-control" value="${u ? u.idResidente || '' : ''}"></div>
+          <div class="form-group"><label>ID Residente</label><input type="number" id="usr-id-residente" class="form-control" value="${u ? u.idResidente || '' : ''}" placeholder="Dejar vac\u00edo para admin/portero"></div>
         </div>
         <div class="form-group"><label><input type="checkbox" id="usr-activo" ${!u || u.activo ? 'checked' : ''}> Activo</label></div>
       </form>`,
@@ -81,12 +81,18 @@ const Usuarios = (() => {
     Utils.limpiarErrores('form-usuario');
     if (!Utils.valUsername(document.getElementById('usr-username').value, 'usr-username')) return;
     if (!Utils.valPassword(document.getElementById('usr-password').value, 'usr-password', !editingId)) return;
-    if (!Utils.valSelect(document.getElementById('usr-rol').value, 'usr-rol', 'Seleccione el rol')) return;
+    var idResidenteVal = parseInt(document.getElementById('usr-id-residente').value) || null;
+    var rolVal = document.getElementById('usr-rol').value;
+    if (idResidenteVal && rolVal !== 'RESIDENTE') {
+      Utils.showToast('Si se asigna un ID de residente, el rol debe ser RESIDENTE', 'error');
+      return;
+    }
+    if (!Utils.valSelect(rolVal, 'usr-rol', 'Seleccione el rol')) return;
     const d = {
       username: document.getElementById('usr-username').value.trim(),
       passwordHash: document.getElementById('usr-password').value,
-      rol: document.getElementById('usr-rol').value,
-      idResidente: parseInt(document.getElementById('usr-id-residente').value) || null,
+      rol: rolVal,
+      idResidente: idResidenteVal,
       activo: document.getElementById('usr-activo').checked
     };
     var btn = document.getElementById('btn-guardar-usuario');

@@ -110,6 +110,8 @@ public class UsuarioService {
             throw new DatosInvalidosException("El password es obligatorio.");
         if (u.getRol() == null)
             throw new DatosInvalidosException("El rol es obligatorio.");
+        if (u.getIdResidente() != null && u.getRol() != TipoRol.RESIDENTE)
+            throw new DatosInvalidosException("Si se asigna un residente, el rol debe ser RESIDENTE.");
     }
 
     private void validarId(Integer id) {
