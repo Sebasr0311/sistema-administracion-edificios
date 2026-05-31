@@ -55,9 +55,9 @@ const Parqueaderos = (() => {
     try {
       data = await API.get('/parqueaderos');
       _allData = data.slice();
-      var pagEl = document.getElementById('pagination-parqueaderos');
-      if (pagEl && !document.getElementById('search-parqueaderos')) {
-        pagEl.insertAdjacentHTML('beforebegin', Utils.buscadorHtml('search-parqueaderos', 'Buscar por c\u00f3digo, torre, propietario o estado...'));
+      var tblContainer = document.querySelector('.table-container');
+      if (tblContainer && !document.getElementById('search-parqueaderos')) {
+        tblContainer.insertAdjacentHTML('beforebegin', Utils.buscadorHtml('search-parqueaderos', 'Buscar por c\u00f3digo, torre, propietario o estado...'));
         Utils.crearBuscador('search-parqueaderos', _allData, ['codigo', 'tipo', 'numeroApartamento', 'nombrePropietario', 'estado'], function(f) { data = f; currentPage = 1; render(); });
       }
       currentPage = 1; render();

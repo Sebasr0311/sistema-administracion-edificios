@@ -507,7 +507,7 @@ const Utils = (() => {
   }
 
   function buscadorHtml(id, placeholder) {
-    return '<div class="search-bar" style="margin-bottom:12px">' +
+    return '<div class="search-bar" style="position:relative;margin-bottom:12px">' +
       '<span class="material-symbols-outlined" style="position:absolute;margin:8px 0 0 12px;color:var(--text-secondary);font-size:20px">search</span>' +
       '<input type="text" id="' + id + '" class="form-control" style="padding-left:40px" placeholder="' + (placeholder || 'Buscar...') + '">' +
     '</div>';
