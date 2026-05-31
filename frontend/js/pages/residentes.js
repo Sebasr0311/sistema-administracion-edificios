@@ -241,15 +241,14 @@ const Residentes = (() => {
     var select = document.getElementById(selectId);
     if (!input || !select) return;
 
-    function aplicarFiltro() {
+    function aplicarFiltro(limpiar) {
       var codigo = getTipoDocCodigo(select.value);
       if (!codigo) return;
       var cfg = getConfigDocumento(codigo);
       input.maxLength = cfg.maxLength;
       input.setAttribute('data-filter', cfg.pattern.source);
       input.setAttribute('data-upper', cfg.uppercase ? '1' : '0');
-      // Limpiar valor actual si no coincide
-      if (input.value) {
+      if (limpiar && input.value) {
         input.value = input.value.replace(new RegExp(cfg.pattern.source, 'g'), '');
         if (cfg.uppercase) input.value = input.value.toUpperCase();
       }
@@ -259,7 +258,7 @@ const Residentes = (() => {
       input.classList.remove('is-invalid');
       var errorEl = input.parentNode.querySelector('.field-error');
       if (errorEl) errorEl.textContent = '';
-      aplicarFiltro();
+      aplicarFiltro(true);
     });
 
     input.addEventListener('input', function(e) {
@@ -293,8 +292,7 @@ const Residentes = (() => {
       }
     });
 
-    // Aplicar filtro inicial si hay un tipo pre-seleccionado o valor existente
-    aplicarFiltro();
+    aplicarFiltro(false);
   }
 
   function getConfigDocumento(codigo) {
