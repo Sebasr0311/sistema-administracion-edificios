@@ -194,7 +194,7 @@ const Residentes = (() => {
             </div>
             <div class="form-group" id="tutor-parentesco-otro-group" style="${tutor && !['PADRE','MADRE','ABUELO','ABUELA','TIO','TIA','HERMANO','HERMANA','TUTOR_LEGAL','Padre','Madre','Abuelo','Abuela','T\u00edo','T\u00eda','Hermano','Hermana','Tutor Legal'].includes(tutor.parentesco) ? '' : 'display:none'}">
               <label>Especifique parentesco</label>
-              <input type="text" id="tutor-parentesco-otro" class="form-control" value="${tutor && !['PADRE','MADRE','ABUELO','ABUELA','TIO','TIA','HERMANO','HERMANA','TUTOR_LEGAL','Padre','Madre','Abuelo','Abuela','T\u00edo','T\u00eda','Hermano','Hermana','Tutor Legal'].includes(tutor.parentesco) ? Utils.escapeHtml(tutor.parentesco || '') : ''}">
+              <input type="text" id="tutor-parentesco-otro" class="form-control" value="${tutor && !['PADRE','MADRE','ABUELO','ABUELA','TIO','TIA','HERMANO','HERMANA','TUTOR_LEGAL','Padre','Madre','Abuelo','Abuela','T\u00edo','T\u00eda','Hermano','Hermana','Tutor Legal'].includes(tutor.parentesco) ? Utils.escapeHtml(tutor.otroParentesco || tutor.parentesco || '') : ''}">
               <span class="field-error" id="tutor-parentesco-otro-error"></span>
             </div>
           </div>
@@ -527,7 +527,8 @@ const Residentes = (() => {
         apellidos: document.getElementById('tutor-apellidos').value.trim(),
         telefono: document.getElementById('tutor-telefono').value.trim(),
         email: document.getElementById('tutor-email').value.trim(),
-        parentesco: (function() { var v = document.getElementById('tutor-parentesco').value; return v === 'OTRO' ? document.getElementById('tutor-parentesco-otro').value.trim() || 'OTRO' : v; })()
+        parentesco: document.getElementById('tutor-parentesco').value,
+        otroParentesco: (function() { var v = document.getElementById('tutor-parentesco').value; return v === 'OTRO' ? document.getElementById('tutor-parentesco-otro').value.trim() || null : null; })()
       };
     }
     
