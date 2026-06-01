@@ -24,7 +24,7 @@ public class TutorDAO implements CrudDAO<Tutor> {
     public List<Tutor> findAll() throws SQLException {
         List<Tutor> lista = new ArrayList<>();
         String sql = "SELECT id_tutor, id_residente_menor, id_tipo_doc, numero_documento, "
-                   + "       nombres, apellidos, telefono, email, parentesco, doc_pdf_url, "
+                   + "       nombres, apellidos, telefono, email, parentesco, otro_parentesco, doc_pdf_url, "
                    + "       fecha_registro, actualizado_en "
                    + "FROM   TUTORES ORDER BY apellidos, nombres";
         try (PreparedStatement ps = conn().prepareStatement(sql);
@@ -37,7 +37,7 @@ public class TutorDAO implements CrudDAO<Tutor> {
     @Override
     public Tutor findById(Integer id) throws SQLException {
         String sql = "SELECT id_tutor, id_residente_menor, id_tipo_doc, numero_documento, "
-                   + "       nombres, apellidos, telefono, email, parentesco, doc_pdf_url, "
+                   + "       nombres, apellidos, telefono, email, parentesco, otro_parentesco, doc_pdf_url, "
                    + "       fecha_registro, actualizado_en "
                    + "FROM   TUTORES WHERE id_tutor = ?";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
