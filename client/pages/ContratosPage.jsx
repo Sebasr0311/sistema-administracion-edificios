@@ -113,7 +113,7 @@ export default function ContratosPage() {
   }
 
   async function reenviarCorreo(idContrato) {
-    if (!window.confirm(`Â¿Desea reenviar el correo de notificaciÃ³n del contrato #${idContrato} al residente?`)) return;
+    if (!window.confirm(`¿Desea reenviar el correo de notificación del contrato #${idContrato} al residente?`)) return;
     try {
       await api.post(`/contratos/${idContrato}/reenviar-correo`);
       setToast({ message: 'Correo reenviado exitosamente', type: 'success' });
@@ -189,9 +189,9 @@ export default function ContratosPage() {
 
   function handleEmailStatus(res) {
     if (res.emailStatus === 'enviado') {
-      setToast({ message: 'Correo de notificaciÃ³n enviado al residente', type: 'success' });
+      setToast({ message: 'Correo de notificación enviado al residente', type: 'success' });
     } else if (res.emailStatus === 'sin_email') {
-      setToast({ message: 'El residente no tiene correo electrÃ³nico registrado', type: 'warning' });
+      setToast({ message: 'El residente no tiene correo electrónico registrado', type: 'warning' });
     } else if (res.emailStatus === 'error') {
       setToast({
         message: `Contrato creado. No se pudo enviar el correo: ${res.emailMensaje || ''}. Puede reenviarlo desde la tabla.`,
@@ -441,7 +441,7 @@ export default function ContratosPage() {
             onChange={(e) => onApartamentoChange(e.target.value)}
             error={errors.idApartamento}
           >
-            <option value="">â€” Seleccionar â€”</option>
+            <option value="">— Seleccionar —</option>
             {(apartamentos?.items || []).map((a) => (
               <option key={a.idApartamento} value={a.idApartamento}>
                 Apto {a.numero}
@@ -455,7 +455,7 @@ export default function ContratosPage() {
             onChange={(e) => update('idResidente', e.target.value)}
             error={errors.idResidente}
           >
-            <option value="">â€” Seleccionar â€”</option>
+            <option value="">— Seleccionar —</option>
             {(residentes?.items || []).map((r) => (
               <option key={r.id} value={r.id}>
                 {r.nombres} {r.apellidos}
@@ -507,7 +507,7 @@ export default function ContratosPage() {
               checked={form.enviarCorreo}
               onChange={(e) => update('enviarCorreo', e.target.checked)}
             />
-            <span>Enviar correo de notificaciÃ³n al residente</span>
+            <span>Enviar correo de notificación al residente</span>
           </label>
         </div>
       </Modal>
@@ -566,7 +566,7 @@ export default function ContratosPage() {
         onClose={() => setConfirmCancelar(null)}
         onConfirm={cancelar}
         title="Cancelar contrato"
-        message={`Â¿Cancelar el contrato #${confirmCancelar?.idContrato}? El apartamento quedarÃ¡ disponible.`}
+        message={`¿Cancelar el contrato #${confirmCancelar?.idContrato}? El apartamento quedará disponible.`}
         confirmLabel="Cancelar contrato"
         danger
       />

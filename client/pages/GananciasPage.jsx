@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '../components/ui/Button.jsx';
 import { Input } from '../components/ui/Form.jsx';
 import { DataTable } from '../components/ui/DataTable.jsx';
@@ -28,7 +28,7 @@ function exportarExcel(pagos, fechaInicio, fechaFin) {
   let xls =
     '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
     '<head><meta charset="UTF-8"><style>table{width:100%;border-collapse:collapse}th{background:#0F2044;color:#fff}</style></head><body><table>' +
-    '<thead><tr><th>#</th><th>Fecha</th><th>Tipo</th><th>Apartamento</th><th>Residente</th><th>MÃ©todo</th><th>Valor</th><th>DescripciÃ³n</th></tr></thead><tbody>';
+    '<thead><tr><th>#</th><th>Fecha</th><th>Tipo</th><th>Apartamento</th><th>Residente</th><th>Método</th><th>Valor</th><th>Descripción</th></tr></thead><tbody>';
   pagos.forEach((p) => {
     xls += `<tr><td>${p.id}</td><td>${p.fecha || ''}</td><td>${p.tipoPago || 'Cuota'}</td><td>${p.apartamento || ''}</td><td>${p.residente || ''}</td><td>${p.metodo || ''}</td><td>${p.valor ?? 0}</td><td>${p.descripcion || ''}</td></tr>`;
   });
@@ -44,12 +44,15 @@ function exportarExcel(pagos, fechaInicio, fechaFin) {
   URL.revokeObjectURL(url);
 }
 
+const PAGE_SIZE = 10;
+
 export default function GananciasPage() {
   const [toast, setToast] = useState(null);
   const [search, setSearch] = useState('');
   const [fechaInicio, setFechaInicio] = useState(`${new Date().getFullYear()}-01-01`);
   const [fechaFin, setFechaFin] = useState(todayStr());
   const [fechaError, setFechaError] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const r = validarFechas({ fechaInicio, fechaFin });
@@ -71,6 +74,15 @@ export default function GananciasPage() {
     });
   }, [all, search, fechaInicio, fechaFin]);
 
+  // Reinicia a la primera página cuando cambian los filtros.
+  useEffect(() => {
+    setPage(1);
+  }, [search, fechaInicio, fechaFin]);
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
+  const paginaSegura = Math.min(page, totalPaginas);
+  const filasDePagina = filtrados.slice((paginaSegura - 1) * PAGE_SIZE, paginaSegura * PAGE_SIZE);
+
   const stats = useMemo(() => {
     const totalPagos = filtrados.length;
     const totalIngresos = filtrados.reduce((s, p) => s + Number(p.valor || 0), 0);
@@ -85,9 +97,9 @@ export default function GananciasPage() {
     { key: 'tipoPago', label: 'Tipo', render: (r) => r.tipoPago || 'Cuota' },
     { key: 'apartamento', label: 'Apartamento' },
     { key: 'residente', label: 'Residente' },
-    { key: 'metodo', label: 'MÃ©todo' },
+    { key: 'metodo', label: 'Método' },
     { key: 'valor', label: 'Valor', render: (r) => formatCurrency(r.valor) },
-    { key: 'descripcion', label: 'DescripciÃ³n' },
+    { key: 'descripcion', label: 'Descripción' },
   ];
 
   return (
@@ -123,8 +135,8 @@ export default function GananciasPage() {
           )}
           <Input
             id="search" aria-label="Buscar"
-            label="BÃºsqueda rÃ¡pida"
-            placeholder="Apto, residente, mÃ©todo..."
+            label="Búsqueda rápida"
+            placeholder="Apto, residente, método..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -140,11 +152,36 @@ export default function GananciasPage() {
 
       <DataTable
         columns={columns}
-        rows={filtrados}
+        rows={filasDePagina}
         loading={loading}
         empty="No hay ganancias en el rango seleccionado"
         keyField="id"
       />
+
+      {!loading && filtrados.length > PAGE_SIZE && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={paginaSegura <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            ← Anterior
+          </Button>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+            Página {paginaSegura} de {totalPaginas}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={paginaSegura >= totalPaginas}
+            onClick={() => setPage((p) => Math.min(totalPaginas, p + 1))}
+          >
+            Siguiente →
+          </Button>
+        </div>
+      )}
+
       <Toast toast={toast} />
     </div>
   );
