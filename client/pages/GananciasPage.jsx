@@ -44,12 +44,15 @@ function exportarExcel(pagos, fechaInicio, fechaFin) {
   URL.revokeObjectURL(url);
 }
 
+const PAGE_SIZE = 10;
+
 export default function GananciasPage() {
   const [toast, setToast] = useState(null);
   const [search, setSearch] = useState('');
   const [fechaInicio, setFechaInicio] = useState(`${new Date().getFullYear()}-01-01`);
   const [fechaFin, setFechaFin] = useState(todayStr());
   const [fechaError, setFechaError] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const r = validarFechas({ fechaInicio, fechaFin });
@@ -70,6 +73,15 @@ export default function GananciasPage() {
         .some((v) => String(v).toLowerCase().includes(term));
     });
   }, [all, search, fechaInicio, fechaFin]);
+
+  // Reinicia a la primera página cuando cambian los filtros.
+  useEffect(() => {
+    setPage(1);
+  }, [search, fechaInicio, fechaFin]);
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
+  const paginaSegura = Math.min(page, totalPaginas);
+  const filasDePagina = filtrados.slice((paginaSegura - 1) * PAGE_SIZE, paginaSegura * PAGE_SIZE);
 
   const stats = useMemo(() => {
     const totalPagos = filtrados.length;
@@ -140,11 +152,36 @@ export default function GananciasPage() {
 
       <DataTable
         columns={columns}
-        rows={filtrados}
+        rows={filasDePagina}
         loading={loading}
         empty="No hay ganancias en el rango seleccionado"
         keyField="id"
       />
+
+      {!loading && filtrados.length > PAGE_SIZE && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={paginaSegura <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            ← Anterior
+          </Button>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+            Página {paginaSegura} de {totalPaginas}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={paginaSegura >= totalPaginas}
+            onClick={() => setPage((p) => Math.min(totalPaginas, p + 1))}
+          >
+            Siguiente →
+          </Button>
+        </div>
+      )}
+
       <Toast toast={toast} />
     </div>
   );
