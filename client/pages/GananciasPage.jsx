@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '../components/ui/Button.jsx';
 import { Input } from '../components/ui/Form.jsx';
 import { DataTable } from '../components/ui/DataTable.jsx';
@@ -28,7 +28,7 @@ function exportarExcel(pagos, fechaInicio, fechaFin) {
   let xls =
     '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
     '<head><meta charset="UTF-8"><style>table{width:100%;border-collapse:collapse}th{background:#0F2044;color:#fff}</style></head><body><table>' +
-    '<thead><tr><th>#</th><th>Fecha</th><th>Tipo</th><th>Apartamento</th><th>Residente</th><th>MÃ©todo</th><th>Valor</th><th>DescripciÃ³n</th></tr></thead><tbody>';
+    '<thead><tr><th>#</th><th>Fecha</th><th>Tipo</th><th>Apartamento</th><th>Residente</th><th>Método</th><th>Valor</th><th>Descripción</th></tr></thead><tbody>';
   pagos.forEach((p) => {
     xls += `<tr><td>${p.id}</td><td>${p.fecha || ''}</td><td>${p.tipoPago || 'Cuota'}</td><td>${p.apartamento || ''}</td><td>${p.residente || ''}</td><td>${p.metodo || ''}</td><td>${p.valor ?? 0}</td><td>${p.descripcion || ''}</td></tr>`;
   });
@@ -85,9 +85,9 @@ export default function GananciasPage() {
     { key: 'tipoPago', label: 'Tipo', render: (r) => r.tipoPago || 'Cuota' },
     { key: 'apartamento', label: 'Apartamento' },
     { key: 'residente', label: 'Residente' },
-    { key: 'metodo', label: 'MÃ©todo' },
+    { key: 'metodo', label: 'Método' },
     { key: 'valor', label: 'Valor', render: (r) => formatCurrency(r.valor) },
-    { key: 'descripcion', label: 'DescripciÃ³n' },
+    { key: 'descripcion', label: 'Descripción' },
   ];
 
   return (
@@ -123,8 +123,8 @@ export default function GananciasPage() {
           )}
           <Input
             id="search" aria-label="Buscar"
-            label="BÃºsqueda rÃ¡pida"
-            placeholder="Apto, residente, mÃ©todo..."
+            label="Búsqueda rápida"
+            placeholder="Apto, residente, método..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
