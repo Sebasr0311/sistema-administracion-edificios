@@ -4,6 +4,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   base: process.env.VITE_BASE_PATH || '/',
+  server: {
+    host: true,
+    allowedHosts: true,
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
